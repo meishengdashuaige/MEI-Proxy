@@ -7,7 +7,7 @@
   <meta name="description" content="MEI Proxy 是一款轻量易用的浏览器代理管理与智能分流扩展，支持 HTTP、HTTPS、SOCKS5 代理与 PAC 规则分流，配置保存在本地，支持 Chrome、Edge、Firefox 等浏览器。">
   <meta name="keywords" content="MEI Proxy, Proxy Manager, Chrome 代理扩展, Firefox 代理扩展, PAC 脚本, 分流规则, 浏览器代理">
   <link rel="icon" type="image/png" href="icons/icon48.png">
-  <link rel="stylesheet" href="assets/landing.css">
+  <link rel="stylesheet" href="assets/landing.css?v=1.0.3">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -59,18 +59,18 @@
       <div>
         <div class="browser-detect-banner" id="browserDetectBanner">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
-          <span id="browserDetectText">正在检测您的浏览器类型...</span>
+          <span id="browserDetectText">已检测您的浏览器内核并为您推荐专属版本</span>
         </div>
       </div>
 
-      <div class="hero-buttons">
+      <div class="hero-buttons" id="heroButtonsContainer">
         <a href="dist/MEI-Proxy-Chrome.zip" download class="btn btn-primary btn-lg" id="heroDownloadChrome">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="4"></circle><line x1="21.17" y1="8" x2="12" y2="8"></line><line x1="3.95" y1="6.06" x2="8.54" y2="14"></line><line x1="10.88" y1="21.94" x2="15.46" y2="14"></line></svg>
-          下载 Chrome / Edge 扩展 (.zip)
+          <span id="heroTextChrome">下载 Chrome / Edge 扩展 (.zip)</span>
         </a>
         <a href="dist/MEI-Proxy-Firefox.xpi" download class="btn btn-secondary btn-lg" id="heroDownloadFirefox">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-1.076-4.103a6.993 6.993 0 0 0 5.485-2.673c-.503-.097-1.127-.145-1.573-.243-.728-.16-1.523-.42-2.146-.867-.282-.202-.626-.532-.626-.882 0-.25.176-.474.34-.652.502-.544 1.25-.79 1.94-.972.635-.167 1.304-.24 1.956-.347.168-.028.336-.057.502-.09.308-.06.61-.137.9-.24-.035-.386-.113-.765-.233-1.13-.396-1.206-1.185-2.227-2.193-2.91a7.02 7.02 0 0 0-4.043-1.233c-.767 0-1.517.122-2.228.347a6.96 6.96 0 0 0-4.664 5.378c-.08.455-.116.92-.108 1.385a6.998 6.998 0 0 0 7.89 6.133z"/></svg>
-          下载 Firefox 扩展 (.xpi)
+          <span id="heroTextFirefox">下载 Firefox 扩展 (.xpi)</span>
         </a>
       </div>
 
@@ -353,6 +353,169 @@
     </div>
   </footer>
 
-  <script src="assets/landing.js"></script>
+  <!-- Inline Synchronous Detection to Guarantee Immediate Zero-Cache Rendering -->
+  <script>
+    (function() {
+      function applyBrowserDetection() {
+        var ua = navigator.userAgent || '';
+        var isFirefox = ua.indexOf('Firefox') !== -1 || 
+                        ua.indexOf('Gecko/') !== -1 || 
+                        ua.indexOf('Zen') !== -1 || 
+                        ua.indexOf('Floorp') !== -1 || 
+                        ua.indexOf('Waterfox') !== -1 || 
+                        typeof InstallTrigger !== 'undefined';
+        var isEdge = ua.indexOf('Edg') !== -1;
+        var isChrome = (ua.indexOf('Chrome') !== -1 || ua.indexOf('CriOS') !== -1) && !isEdge;
+
+        var browserDetectText = document.getElementById('browserDetectText');
+        var heroDownloadChrome = document.getElementById('heroDownloadChrome');
+        var heroDownloadFirefox = document.getElementById('heroDownloadFirefox');
+        var btnNavDownload = document.getElementById('btnNavDownload');
+
+        var cardChrome = document.getElementById('cardChrome');
+        var cardFirefox = document.getElementById('cardFirefox');
+        var btnDownloadChromeCard = document.getElementById('btnDownloadChromeCard');
+        var btnDownloadFirefoxCard = document.getElementById('btnDownloadFirefoxCard');
+        var btnTextChromeCard = document.getElementById('btnTextChromeCard');
+        var btnTextFirefoxCard = document.getElementById('btnTextFirefoxCard');
+
+        var tabGuideChrome = document.getElementById('tabGuideChrome');
+        var tabGuideFirefox = document.getElementById('tabGuideFirefox');
+        var guideChromeSteps = document.getElementById('guideChromeSteps');
+        var guideFirefoxSteps = document.getElementById('guideFirefoxSteps');
+
+        var badgeSvg = '<span class="card-recommend-badge" id="dynRecommendBadge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> 当前浏览器推荐</span>';
+
+        // Clean existing dynamic badges
+        var oldBadge = document.getElementById('dynRecommendBadge');
+        if (oldBadge && oldBadge.parentNode) oldBadge.parentNode.removeChild(oldBadge);
+
+        if (isFirefox) {
+          if (browserDetectText) {
+            browserDetectText.textContent = '已检测到当前为 Firefox 浏览器，推荐下载 .xpi 扩展包';
+          }
+          if (heroDownloadFirefox) {
+            heroDownloadFirefox.className = 'btn btn-primary btn-lg btn-recommend';
+            heroDownloadFirefox.style.order = '-1';
+          }
+          if (heroDownloadChrome) {
+            heroDownloadChrome.className = 'btn btn-secondary btn-lg';
+            heroDownloadChrome.style.order = '1';
+          }
+          if (btnNavDownload) {
+            btnNavDownload.href = 'dist/MEI-Proxy-Firefox.xpi';
+          }
+
+          // Firefox 卡片高亮与主按钮
+          if (cardFirefox && cardChrome) {
+            cardFirefox.className = 'download-card highlight';
+            cardFirefox.style.order = '-1';
+            cardFirefox.insertAdjacentHTML('afterbegin', badgeSvg);
+
+            if (btnDownloadFirefoxCard) {
+              btnDownloadFirefoxCard.className = 'btn btn-primary btn-lg';
+            }
+            if (btnTextFirefoxCard) {
+              btnTextFirefoxCard.textContent = '下载 Firefox 推荐安装包 (.xpi)';
+            }
+
+            cardChrome.className = 'download-card';
+            cardChrome.style.order = '1';
+            if (btnDownloadChromeCard) {
+              btnDownloadChromeCard.className = 'btn btn-secondary btn-lg';
+            }
+            if (btnTextChromeCard) {
+              btnTextChromeCard.textContent = '下载 Chrome / Edge 扩展包 (.zip)';
+            }
+          }
+
+          // 教程切换至 Firefox
+          if (tabGuideFirefox && tabGuideChrome && guideFirefoxSteps && guideChromeSteps) {
+            tabGuideFirefox.className = 'guide-tab-btn active';
+            tabGuideChrome.className = 'guide-tab-btn';
+            guideFirefoxSteps.style.display = 'block';
+            guideChromeSteps.style.display = 'none';
+          }
+        } else {
+          var browserName = isEdge ? 'Edge' : (isChrome ? 'Chrome' : 'Chromium');
+          if (browserDetectText) {
+            browserDetectText.textContent = '已检测到当前为 ' + browserName + ' 浏览器，推荐下载 .zip 扩展包';
+          }
+          if (heroDownloadChrome) {
+            heroDownloadChrome.className = 'btn btn-primary btn-lg btn-recommend';
+            heroDownloadChrome.style.order = '-1';
+          }
+          if (heroDownloadFirefox) {
+            heroDownloadFirefox.className = 'btn btn-secondary btn-lg';
+            heroDownloadFirefox.style.order = '1';
+          }
+          if (btnNavDownload) {
+            btnNavDownload.href = 'dist/MEI-Proxy-Chrome.zip';
+          }
+
+          // Chrome 卡片高亮与主按钮
+          if (cardChrome && cardFirefox) {
+            cardChrome.className = 'download-card highlight';
+            cardChrome.style.order = '-1';
+            cardChrome.insertAdjacentHTML('afterbegin', badgeSvg);
+
+            if (btnDownloadChromeCard) {
+              btnDownloadChromeCard.className = 'btn btn-primary btn-lg';
+            }
+            if (btnTextChromeCard) {
+              btnTextChromeCard.textContent = '下载 ' + browserName + ' 推荐扩展包 (.zip)';
+            }
+
+            cardFirefox.className = 'download-card';
+            cardFirefox.style.order = '1';
+            if (btnDownloadFirefoxCard) {
+              btnDownloadFirefoxCard.className = 'btn btn-secondary btn-lg';
+            }
+            if (btnTextFirefoxCard) {
+              btnTextFirefoxCard.textContent = '下载 Firefox 安装包 (.xpi)';
+            }
+          }
+
+          // 教程切换至 Chrome
+          if (tabGuideChrome && tabGuideFirefox && guideChromeSteps && guideFirefoxSteps) {
+            tabGuideChrome.className = 'guide-tab-btn active';
+            tabGuideFirefox.className = 'guide-tab-btn';
+            guideChromeSteps.style.display = 'block';
+            guideFirefoxSteps.style.display = 'none';
+          }
+        }
+      }
+
+      // Execute immediately and on DOM load
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', applyBrowserDetection);
+      } else {
+        applyBrowserDetection();
+      }
+
+      // Tab handlers
+      window.addEventListener('load', function() {
+        var tabGuideChrome = document.getElementById('tabGuideChrome');
+        var tabGuideFirefox = document.getElementById('tabGuideFirefox');
+        var guideChromeSteps = document.getElementById('guideChromeSteps');
+        var guideFirefoxSteps = document.getElementById('guideFirefoxSteps');
+
+        if (tabGuideChrome && tabGuideFirefox) {
+          tabGuideChrome.onclick = function() {
+            tabGuideChrome.className = 'guide-tab-btn active';
+            tabGuideFirefox.className = 'guide-tab-btn';
+            guideChromeSteps.style.display = 'block';
+            guideFirefoxSteps.style.display = 'none';
+          };
+          tabGuideFirefox.onclick = function() {
+            tabGuideFirefox.className = 'guide-tab-btn active';
+            tabGuideChrome.className = 'guide-tab-btn';
+            guideChromeSteps.style.display = 'none';
+            guideFirefoxSteps.style.display = 'block';
+          };
+        }
+      });
+    })();
+  </script>
 </body>
 </html>
