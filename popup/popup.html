@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MEI Proxy</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="liquid-bg-ambient"></div>
+  <div class="popup-container">
+    <!-- Header -->
+    <header class="header liquid-glass">
+      <div class="brand">
+        <img src="../icons/icon32.png" alt="MEI Logo" class="brand-logo">
+        <div class="brand-text">
+          <div class="brand-title-row">
+            <span class="brand-title">MEI Proxy</span>
+            <span class="live-badge" id="headerLiveBadge">智能分流</span>
+          </div>
+          <span class="brand-subtitle" id="activeProfileSubtitle">智能分流模式</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="btnOpenOptions" class="icon-btn" title="打开管理控制台">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Global Core Mode Segmented Switcher -->
+    <div class="segmented-modes liquid-glass">
+      <button class="mode-btn active" id="btnModeAuto" data-id="auto_switch">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        <span>智能分流</span>
+      </button>
+      <button class="mode-btn" id="btnModeDirect" data-id="direct">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line></svg>
+        <span>直接连接</span>
+      </button>
+      <button class="mode-btn" id="btnModeSystem" data-id="system">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        <span>系统代理</span>
+      </button>
+    </div>
+
+    <!-- Network & IP Bar -->
+    <div class="network-bar liquid-glass" id="statusCard">
+      <div class="network-left">
+        <span class="network-pulse"></span>
+        <span class="network-ip" id="currentIpValue">检测中...</span>
+        <span class="network-loc" id="locationText">正在定位...</span>
+      </div>
+      <div class="network-right">
+        <span class="network-ping" id="latencyValue">-- ms</span>
+        <button id="btnRefreshStatus" class="network-refresh-btn" title="刷新网络">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Nodes Section -->
+    <div class="section nodes-section">
+      <div class="nodes-header">
+        <div class="nodes-title-group">
+          <span class="section-title">代理节点</span>
+          <span class="nodes-count-tag" id="nodesCountTag">0</span>
+        </div>
+        <div class="nodes-actions">
+          <button id="btnSelectFastest" class="action-chip-btn" title="并发测速并自动切换到最低延时节点">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            <span>测速选优</span>
+          </button>
+          <button id="btnToggleSearch" class="action-chip-btn" title="搜索节点">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Search Row (Toggleable) -->
+      <div class="search-row hidden" id="searchRow">
+        <input type="text" id="nodeSearchInput" class="search-input" placeholder="输入节点名 / IP / 端口搜索...">
+        <button id="btnClearSearch" class="search-clear-btn">&times;</button>
+      </div>
+
+      <!-- Category Filter Pills -->
+      <div class="filter-pills-bar" id="filterPillsBar">
+        <!-- Injected dynamically: All, Favorites, Custom Nodes -->
+      </div>
+
+      <!-- Scrollable Node Cards List -->
+      <div class="node-list" id="profileListContainer">
+        <!-- Node items injected by JS -->
+      </div>
+    </div>
+
+    <!-- Quick Add Rule for Current Tab -->
+    <div class="quick-rule-box liquid-glass" id="quickRuleSection">
+      <div class="site-row">
+        <div class="site-badge">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="2" y1="12" x2="22" y2="12"></line>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+          </svg>
+          <span class="current-domain" id="currentDomainText">检测中...</span>
+        </div>
+        <span class="quick-rule-hint">网站一键分流</span>
+      </div>
+      <div class="quick-rule-controls">
+        <select id="quickRuleTargetSelect" class="select-input select-sm">
+          <!-- Dynamic profile options -->
+        </select>
+        <button id="btnQuickAddRule" class="btn-primary btn-sm">
+          <span>加入规则</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-tip" id="toastMessage">就绪</div>
+      <a href="#" id="linkDashboard" class="footer-link">设置管理中心 &rarr;</a>
+    </footer>
+  </div>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

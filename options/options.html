@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MEI Proxy</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <img src="../icons/icon48.png" alt="MEI Logo" class="brand-icon">
+        <div class="brand-info">
+          <h2>MEI Proxy</h2>
+          <span class="version-tag">v1.0.0</span>
+        </div>
+      </div>
+
+      <nav class="nav-menu">
+        <button class="nav-item" data-tab="tab-profiles">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+            <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+            <line x1="6" y1="6" x2="6.01" y2="6"></line>
+            <line x1="6" y1="18" x2="6.01" y2="18"></line>
+          </svg>
+          <span>代理节点管理</span>
+        </button>
+
+        <button class="nav-item" data-tab="tab-rules">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="16 3 21 3 21 8"></polyline>
+            <line x1="4" y1="20" x2="21" y2="3"></line>
+            <polyline points="21 16 21 21 16 21"></polyline>
+            <line x1="15" y1="15" x2="21" y2="21"></line>
+            <line x1="4" y1="4" x2="9" y2="9"></line>
+          </svg>
+          <span>智能分流规则</span>
+        </button>
+
+        <button class="nav-item" data-tab="tab-bypass">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+          <span>绕过名单 (Bypass)</span>
+        </button>
+
+        <button class="nav-item" data-tab="tab-pac">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="16 18 22 12 16 6"></polyline>
+            <polyline points="8 6 2 12 8 18"></polyline>
+          </svg>
+          <span>自定义 PAC 脚本</span>
+        </button>
+
+        <button class="nav-item" data-tab="tab-backup">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          <span>备份与还原</span>
+        </button>
+
+        <button class="nav-item" data-tab="tab-general">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span>偏好与关于</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="status-indicator">
+          <span class="dot active"></span>
+          <span id="sidebarStatusText">服务运行正常</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- TAB 1: 代理节点管理 -->
+      <section id="tab-profiles" class="tab-pane active">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">代理节点管理</h1>
+            <p class="page-desc">配置与管理 HTTP / HTTPS / SOCKS4 / SOCKS5 代理服务器节点（浏览器原生直连）</p>
+          </div>
+          <div class="header-btn-group">
+            <button id="btnCleanDeadNodes" class="btn btn-secondary" title="自动测试并一键移除不可达或超时的节点">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+              清理失效节点
+            </button>
+            <button id="btnOpenAddProfileModal" class="btn btn-primary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              新建代理节点
+            </button>
+          </div>
+        </div>
+
+        <!-- Node Management Filter Toolbar -->
+        <div class="card toolbar-card">
+          <div class="filter-toolbar-row">
+            <div class="search-box" style="flex: 1; min-width: 220px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input type="text" id="profileSearchInput" placeholder="搜索节点名 / IP / 端口 / 地区...">
+            </div>
+
+            <div class="toolbar-controls">
+              <!-- Protocol Filter -->
+              <select id="filterProfileProtocol" class="select-input select-sm">
+                <option value="ALL">全部协议</option>
+                <option value="socks5">SOCKS5</option>
+                <option value="http">HTTP</option>
+                <option value="https">HTTPS</option>
+                <option value="socks4">SOCKS4</option>
+              </select>
+
+              <!-- Sort Option -->
+              <select id="sortProfileOption" class="select-input select-sm">
+                <option value="DEFAULT">默认排序</option>
+                <option value="LATENCY_ASC">延时由低到高 (最快优先)</option>
+                <option value="NAME_ASC">节点名称 A-Z</option>
+                <option value="FAV_FIRST">常用收藏置顶</option>
+              </select>
+
+              <!-- View Mode Switcher -->
+              <div class="view-mode-toggle">
+                <button class="view-mode-btn active" id="btnViewGrid" title="卡片网格视图">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                </button>
+                <button class="view-mode-btn" id="btnViewList" title="紧凑列表视图">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Profiles Container (Cards Grid / List Table) -->
+        <div class="profile-cards-grid" id="profilesGrid">
+          <!-- Profiles Cards injected by JS -->
+        </div>
+
+        <div class="card table-card hidden" id="profilesListCard">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th width="40">收藏</th>
+                  <th>节点名称</th>
+
+                  <th width="90">协议</th>
+                  <th>服务器与端口</th>
+                  <th width="110">网络延时</th>
+                  <th width="140" class="text-right">操作</th>
+                </tr>
+              </thead>
+              <tbody id="profilesTableBody">
+                <!-- Rows injected by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: 智能分流规则 -->
+      <section id="tab-rules" class="tab-pane">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">智能分流规则 (Auto Switch)</h1>
+            <p class="page-desc">按域名通配符、正则或关键词自动将流量分发至不同节点（首条命中原则）</p>
+          </div>
+          <div class="header-btn-group">
+            <button id="btnOpenPresetRuleSetModal" class="btn btn-secondary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+              一键导入常用规则集
+            </button>
+            <button id="btnSaveCurrentRulesAsTemplate" class="btn btn-secondary" title="将当前启用的规则保存为独立规则模板">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+              保存为模板
+            </button>
+            <button id="btnOpenAddRuleModal" class="btn btn-primary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              添加规则
+            </button>
+          </div>
+        </div>
+
+        <!-- Rule Match Simulator Sandbox -->
+        <div class="card sandbox-card">
+          <div class="sandbox-header">
+            <div class="sandbox-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <span>规则实时命中沙盒测试</span>
+            </div>
+            <span class="sandbox-hint">输入任意网址快速验证分流逻辑</span>
+          </div>
+          <div class="sandbox-body">
+            <input type="text" id="sandboxInput" class="input-text" placeholder="例如：https://www.youtube.com 或 api.openai.com">
+            <button id="btnTestSandbox" class="btn btn-secondary">模拟测试</button>
+          </div>
+          <div id="sandboxResult" class="sandbox-result hidden">
+            <!-- Test result display -->
+          </div>
+        </div>
+
+        <!-- Rules Table -->
+        <div class="card table-card">
+          <div class="table-toolbar">
+            <div class="search-box">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input type="text" id="ruleSearchInput" placeholder="搜索规则或域名...">
+            </div>
+            <div class="default-rule-selector">
+              <span>未匹配默认动作:</span>
+              <select id="selectDefaultFallbackProfile" class="select-input select-sm">
+                <!-- Fallback profiles -->
+              </select>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th width="70">状态</th>
+                  <th width="110">匹配模式</th>
+                  <th>匹配条件 (Pattern)</th>
+                  <th width="190">目标出口节点</th>
+                  <th>备注说明</th>
+                  <th width="110" class="text-right">操作</th>
+                </tr>
+              </thead>
+              <tbody id="rulesTableBody">
+                <!-- Rules rows injected by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: 绕过名单 -->
+      <section id="tab-bypass" class="tab-pane">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">绕过代理名单 (Bypass List)</h1>
+            <p class="page-desc">匹配以下名单的主机或 IP 将强制直接连接，不通过任何代理</p>
+          </div>
+          <button id="btnSaveBypass" class="btn btn-primary">保存绕过配置</button>
+        </div>
+
+        <div class="card">
+          <div class="form-group">
+            <label class="form-label">绕过地址列表 (每行一条规则，支持通配符与 CIDR)</label>
+            <textarea id="bypassListTextarea" class="input-textarea" rows="12" placeholder="&lt;local&gt;&#10;127.0.0.1&#10;192.168.0.0/16&#10;localhost&#10;*.corp.internal"></textarea>
+            <span class="form-help">
+              常用内置规则：<code>&lt;local&gt;</code> 匹配所有不含点号的本地主机名；<code>127.0.0.1</code> 匹配本机；<code>192.168.*</code> 匹配局域网。
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: 自定义 PAC -->
+      <section id="tab-pac" class="tab-pane">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">自定义 PAC 脚本模式</h1>
+            <p class="page-desc">直接编写 JavaScript Proxy Auto-Config 脚本或通过远程 URL 订阅</p>
+          </div>
+          <button id="btnSavePac" class="btn btn-primary">保存 PAC 配置</button>
+        </div>
+
+        <div class="card">
+          <div class="form-group">
+            <label class="form-label">远程 PAC 订阅 URL (可选，若填写则优先从 URL 获取)</label>
+            <input type="text" id="pacUrlInput" class="input-text" placeholder="https://example.com/proxy.pac">
+          </div>
+          <div class="form-group">
+            <label class="form-label">自定义 PAC 代码 (纯 JavaScript)</label>
+            <textarea id="pacScriptTextarea" class="input-textarea font-mono" rows="14" spellcheck="false"></textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 5: 备份与还原 -->
+      <section id="tab-backup" class="tab-pane">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">备份与还原</h1>
+            <p class="page-desc">导出当前全部代理配置与分流规则，或从备份文件恢复</p>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <h3 class="card-title">导出配置备份</h3>
+            <p class="card-desc">将您的所有代理节点、分流规则及个性化偏好导出为 JSON 格式文件。</p>
+            <button id="btnExportConfig" class="btn btn-secondary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              导出 JSON 配置文件
+            </button>
+          </div>
+
+          <div class="card">
+            <h3 class="card-title">导入配置恢复</h3>
+            <p class="card-desc">选择之前导出的 JSON 备份文件进行快速还原。</p>
+            <input type="file" id="importFileInput" accept=".json" style="display: none;">
+            <button id="btnTriggerImport" class="btn btn-secondary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+              选择文件并导入
+            </button>
+          </div>
+        </div>
+
+        <div class="card danger-card" style="margin-top: 20px;">
+          <h3 class="card-title text-danger">重置为出厂默认设置</h3>
+          <p class="card-desc">将清空所有自定义添加的代理节点与分流规则，恢复为插件初始预置状态。</p>
+          <button id="btnResetDefaults" class="btn btn-danger">重置为初始配置</button>
+        </div>
+      </section>
+
+      <!-- TAB 6: 偏好与关于 -->
+      <section id="tab-general" class="tab-pane">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">偏好与关于</h1>
+            <p class="page-desc">扩展外观主题与系统行为设置</p>
+          </div>
+          <button id="btnSaveGeneral" class="btn btn-primary">保存偏好设置</button>
+        </div>
+
+        <div class="card">
+          <div class="settings-row">
+            <div class="settings-text">
+              <span class="settings-title">在扩展图标上显示角标状态 (Badge)</span>
+              <span class="settings-desc">实时在浏览器右上角图标显示当前激活模式（直连/分流/节点简称与颜色）</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="chkShowBadge" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="settings-row">
+            <div class="settings-text">
+              <span class="settings-title">Popup 打开时自动检测出口 IP 与延时</span>
+              <span class="settings-desc">点击弹出菜单时自动并发探测网络归属地与出口节点延时</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="chkAutoCheckIp" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="card about-card" style="margin-top: 20px;">
+          <div class="about-header">
+            <img src="../icons/icon48.png" alt="MEI Logo">
+            <div>
+              <h3>MEI Proxy</h3>
+              <p>专为现代化浏览器打造的高性能代理管理工具，全面兼容 Chromium 与 Firefox 内核</p>
+            </div>
+          </div>
+          <div class="about-meta">
+            <div class="meta-item"><span>版本</span><strong>v1.0.0</strong></div>
+            <div class="meta-item"><span>规范</span><strong>Manifest V3 双引擎架构</strong></div>
+            <div class="meta-item"><span>技术栈</span><strong>Chrome & Firefox Proxy API · ES Modules</strong></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal: 添加/编辑代理节点 -->
+  <div class="modal-overlay" id="profileModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title" id="profileModalTitle">添加代理节点</h3>
+        <button class="modal-close" id="btnCloseProfileModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="profileForm">
+          <input type="hidden" id="profileFormId">
+
+          <div class="form-group">
+            <label class="form-label">节点名称 *</label>
+            <input type="text" id="profileNameInput" class="input-text" placeholder="例如：本地 Clash 7890 或 公司代理" required>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label">协议类型 *</label>
+              <select id="profileSchemeSelect" class="select-input">
+                <option value="http">HTTP</option>
+                <option value="https">HTTPS</option>
+                <option value="socks5" selected>SOCKS5</option>
+                <option value="socks4">SOCKS4</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">主题标识颜色</label>
+              <input type="color" id="profileColorInput" class="input-color" value="#3b82f6">
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group" style="flex: 2;">
+              <label class="form-label">服务器地址 (Host / IP) *</label>
+              <input type="text" id="profileHostInput" class="input-text" placeholder="127.0.0.1 或 proxy.example.com" required>
+            </div>
+            <div class="form-group" style="flex: 1;">
+              <label class="form-label">端口 (Port) *</label>
+              <input type="number" id="profilePortInput" class="input-text" placeholder="7890" min="1" max="65535" required>
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label">用户名 (可选)</label>
+              <input type="text" id="profileAuthUserInput" class="input-text" placeholder="无需认证请留空">
+            </div>
+            <div class="form-group">
+              <label class="form-label">密码 (可选)</label>
+              <input type="password" id="profileAuthPassInput" class="input-text" placeholder="无需认证请留空">
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top: 10px;">
+            <label class="form-label">备注说明 (可选)</label>
+            <input type="text" id="profileDescInput" class="input-text" placeholder="如：用于访问开发测试环境">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btnCancelProfileModal">取消</button>
+        <button class="btn btn-primary" id="btnSaveProfile">保存节点</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: 添加/编辑分流规则 -->
+  <div class="modal-overlay" id="ruleModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title" id="ruleModalTitle">添加分流规则</h3>
+        <button class="modal-close" id="btnCloseRuleModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="ruleForm">
+          <input type="hidden" id="ruleFormId">
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label">匹配类型 *</label>
+              <select id="ruleTypeSelect" class="select-input">
+                <option value="wildcard" selected>域名通配符 (如 *.google.com)</option>
+                <option value="exact">精确匹配 (如 github.com)</option>
+                <option value="keyword">关键词匹配 (如 twitter)</option>
+                <option value="regex">正则表达式</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">目标出口动作 *</label>
+              <select id="ruleTargetSelect" class="select-input">
+                <!-- Target profiles injected by JS -->
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">匹配表达式 (Pattern) *</label>
+            <input type="text" id="rulePatternInput" class="input-text font-mono" placeholder="例如：*.youtube.com 或 *.openai.com" required>
+            <span class="form-help" id="ruleTypeHelp">支持使用 * 和 ? 通配符，匹配指定域名的所有子域</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">备注说明 (可选)</label>
+            <input type="text" id="ruleCommentInput" class="input-text" placeholder="例如：视频流媒体加速">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btnCancelRuleModal">取消</button>
+        <button class="btn btn-primary" id="btnSaveRule">保存规则</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: 常用规则集导入与预览 (Preset Rule Sets Modal) -->
+  <div class="modal-overlay" id="presetRuleSetModal">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-header">
+        <h3 class="modal-title" id="presetRuleSetModalTitle">一键导入常用分流规则集</h3>
+        <button class="modal-close" id="btnClosePresetRuleSetModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">选择规则集模块：</label>
+          <select id="selectPresetRuleSet" class="select-input">
+            <!-- Options dynamically loaded from PRESET_RULE_SETS -->
+          </select>
+        </div>
+
+        <div class="ruleset-meta-card" id="presetRuleSetMetaCard" style="background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: 12px; margin-bottom: 14px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+            <span id="presetRuleSetName" style="font-weight: 700; font-size: 14px;">AI 智能与全球开发生态</span>
+            <span class="profile-type-tag" id="presetRuleSetTag">开发 & AI</span>
+          </div>
+          <p id="presetRuleSetDesc" style="font-size: 12px; color: var(--text-secondary); margin: 0; line-height: 1.5;"></p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">包含规则预览 (<span id="presetRuleSetCount">0</span> 条)：</label>
+          <div id="presetRuleSetPreviewList" class="ruleset-preview-list" style="max-height: 160px; overflow-y: auto; background: var(--bg-base); border: 1px solid var(--glass-border); border-radius: var(--radius-sm); padding: 8px; display: flex; flex-direction: column; gap: 4px;">
+            <!-- Preview rule items -->
+          </div>
+        </div>
+
+        <div class="form-row-2" style="margin-top: 14px;">
+          <div class="form-group">
+            <label class="form-label">分流目标节点 *</label>
+            <select id="selectPresetRuleTargetProfile" class="select-input">
+              <!-- Target profiles -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">导入模式 *</label>
+            <select id="selectPresetRuleImportMode" class="select-input">
+              <option value="append" selected>增量追加 (保留现有规则)</option>
+              <option value="overwrite">全量覆盖 (清空现有重置)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btnCancelPresetRuleSetModal">取消</button>
+        <button class="btn btn-primary" id="btnConfirmImportPresetRuleSet">立即导入规则集</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script type="module" src="options.js"></script>
+</body>
+</html>

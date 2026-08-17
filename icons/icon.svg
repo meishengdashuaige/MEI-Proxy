@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <!-- Liquid Glass Background Gradient -->
+    <linearGradient id="liquidGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4f46e5" />
+      <stop offset="45%" stop-color="#6366f1" />
+      <stop offset="85%" stop-color="#7c3aed" />
+      <stop offset="100%" stop-color="#06b6d4" />
+    </linearGradient>
+
+    <!-- Specular Highlight Gradient -->
+    <linearGradient id="specular" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.35" />
+      <stop offset="50%" stop-color="#ffffff" stop-opacity="0.05" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.0" />
+    </linearGradient>
+
+    <!-- MEI Typography Gradient -->
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="50%" stop-color="#f8fafc" />
+      <stop offset="100%" stop-color="#38bdf8" />
+    </linearGradient>
+
+    <filter id="liquidShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#4f46e5" flood-opacity="0.45" />
+    </filter>
+
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Liquid Glass Rounded Container -->
+  <rect x="8" y="8" width="112" height="112" rx="28" fill="url(#liquidGrad)" filter="url(#liquidShadow)" />
+  
+  <!-- Specular top-lit glass layer -->
+  <rect x="8" y="8" width="112" height="112" rx="28" fill="url(#specular)" />
+  <rect x="8" y="8" width="112" height="112" rx="28" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2" />
+
+  <!-- Orbiting network ring -->
+  <circle cx="64" cy="64" r="46" fill="none" stroke="rgba(255, 255, 255, 0.15)" stroke-width="2" stroke-dasharray="6 4" />
+  
+  <!-- Network Connection Nodes -->
+  <circle cx="18" cy="64" r="4.5" fill="#38bdf8" stroke="#ffffff" stroke-width="1.5" />
+  <circle cx="110" cy="64" r="4.5" fill="#10b981" stroke="#ffffff" stroke-width="1.5" />
+  <circle cx="64" cy="18" r="4.5" fill="#f59e0b" stroke="#ffffff" stroke-width="1.5" />
+
+  <!-- "MEI" Brand Typography -->
+  <g filter="url(#glow)">
+    <text x="64" y="74" 
+          font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Arial Black', sans-serif" 
+          font-size="34" 
+          font-weight="900" 
+          letter-spacing="2px" 
+          fill="url(#textGrad)" 
+          text-anchor="middle" 
+          stroke="rgba(0,0,0,0.15)" 
+          stroke-width="1">
+      MEI
+    </text>
+  </g>
+
+  <!-- Modern Proxy Pulse Sub-dot -->
+  <circle cx="64" cy="88" r="3.5" fill="#38bdf8" />
+  <circle cx="52" cy="88" r="2" fill="rgba(255,255,255,0.6)" />
+  <circle cx="76" cy="88" r="2" fill="rgba(255,255,255,0.6)" />
+</svg>
