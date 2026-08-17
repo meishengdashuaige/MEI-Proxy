@@ -350,28 +350,51 @@ body {
 .download-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 24px;
+  gap: 28px;
   max-width: 860px;
   margin: 0 auto;
+  padding-top: 14px;
 }
 
 .download-card {
   background: var(--bg-surface);
   border: 1px solid var(--border-glass);
   border-radius: var(--radius-lg);
-  padding: 32px 28px;
+  padding: 34px 28px;
   text-align: center;
   position: relative;
-  transition: all 0.2s ease;
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .download-card.highlight {
-  border-color: rgba(99, 102, 241, 0.6);
-  background: rgba(22, 30, 50, 0.85);
+  border-color: rgba(99, 102, 241, 0.8);
+  background: rgba(22, 30, 54, 0.95);
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.4), 0 0 24px rgba(99, 102, 241, 0.25);
+  transform: translateY(-2px);
+}
+
+.card-recommend-badge {
+  position: absolute;
+  top: -12px;
+  right: 20px;
+  background: var(--accent-gradient);
+  color: #fff;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 3px 12px;
+  border-radius: var(--radius-full);
+  box-shadow: 0 4px 14px var(--primary-glow);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  letter-spacing: 0.5px;
 }
 
 .download-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-4px);
 }
 
 .download-icon-wrap {

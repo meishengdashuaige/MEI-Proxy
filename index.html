@@ -161,17 +161,17 @@
         <p class="section-desc">根据您当前使用的浏览器选择对应版本</p>
       </div>
 
-      <div class="download-cards">
+      <div class="download-cards" id="downloadCardsContainer">
         <!-- Chromium Card -->
-        <div class="download-card highlight" id="cardChrome">
+        <div class="download-card" id="cardChrome">
           <div class="download-icon-wrap">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="4"></circle><line x1="21.17" y1="8" x2="12" y2="8"></line><line x1="3.95" y1="6.06" x2="8.54" y2="14"></line><line x1="10.88" y1="21.94" x2="15.46" y2="14"></line></svg>
           </div>
           <h3>Chromium 版本</h3>
           <p>适用于 Google Chrome、Microsoft Edge、Brave、Vivaldi、360极速浏览器、QQ浏览器等</p>
-          <a href="dist/MEI-Proxy-Chrome.zip" download class="btn btn-primary btn-lg" style="width: 100%;">
+          <a href="dist/MEI-Proxy-Chrome.zip" download class="btn btn-primary btn-lg" id="btnDownloadChromeCard" style="width: 100%;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-            下载 Chrome 扩展包 (.zip)
+            <span id="btnTextChromeCard">下载 Chrome 扩展包 (.zip)</span>
           </a>
           <div class="download-meta">格式: ZIP 压缩包 · Manifest V3</div>
         </div>
@@ -183,9 +183,9 @@
           </div>
           <h3>Firefox 版本</h3>
           <p>适用于 Mozilla Firefox、Firefox Developer Edition、Zen Browser、Floorp、Waterfox 等</p>
-          <a href="dist/MEI-Proxy-Firefox.xpi" download class="btn btn-secondary btn-lg" style="width: 100%;">
+          <a href="dist/MEI-Proxy-Firefox.xpi" download class="btn btn-secondary btn-lg" id="btnDownloadFirefoxCard" style="width: 100%;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-            下载 Firefox 安装包 (.xpi)
+            <span id="btnTextFirefoxCard">下载 Firefox 安装包 (.xpi)</span>
           </a>
           <div class="download-meta">格式: XPI 安装包 / ZIP 源码</div>
         </div>
