@@ -1,4 +1,5 @@
 :root, [data-theme="light"] {
+  color-scheme: light;
   /* Light Theme Palette */
   --bg-base: #ffffff;
   --bg-header: #ffffff;
@@ -27,6 +28,7 @@
 }
 
 [data-theme="dark"] {
+  color-scheme: dark;
   /* Dark Theme Palette */
   --bg-base: #0f1013;
   --bg-header: #14151a;
@@ -52,6 +54,7 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
+    color-scheme: dark;
     --bg-base: #0f1013;
     --bg-header: #14151a;
     --bg-surface: #15161c;

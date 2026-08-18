@@ -5,6 +5,7 @@
 }
 
 :root, [data-theme="light"] {
+  color-scheme: light;
   --bg-dark: #ffffff;
   --bg-nav: rgba(255, 255, 255, 0.92);
   --bg-surface: #ffffff;
@@ -13,6 +14,9 @@
   --bg-badge: #eff6ff;
   --badge-color: #2563eb;
   --badge-border: #bfdbfe;
+  --bg-badge-success: #f0fdf4;
+  --badge-success-color: #16a34a;
+  --badge-success-border: #bbf7d0;
   --nav-link-hover: #ffffff;
   --border-glass: #e2e8f0;
   --border-glass-hover: #cbd5e1;
@@ -36,6 +40,7 @@
 }
 
 [data-theme="dark"] {
+  color-scheme: dark;
   --bg-dark: #0f1013;
   --bg-nav: rgba(15, 16, 19, 0.92);
   --bg-surface: #15161c;
@@ -44,6 +49,9 @@
   --bg-badge: #1e2638;
   --badge-color: #93c5fd;
   --badge-border: #2d3b59;
+  --bg-badge-success: rgba(34, 197, 94, 0.15);
+  --badge-success-color: #4ade80;
+  --badge-success-border: rgba(34, 197, 94, 0.3);
   --nav-link-hover: #21232c;
   --border-glass: rgba(255, 255, 255, 0.09);
   --border-glass-hover: rgba(255, 255, 255, 0.18);
@@ -62,6 +70,7 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
+    color-scheme: dark;
     --bg-dark: #0f1013;
     --bg-nav: rgba(15, 16, 19, 0.92);
     --bg-surface: #15161c;
@@ -70,6 +79,9 @@
     --bg-badge: #1e2638;
     --badge-color: #93c5fd;
     --badge-border: #2d3b59;
+    --bg-badge-success: rgba(34, 197, 94, 0.15);
+    --badge-success-color: #4ade80;
+    --badge-success-border: rgba(34, 197, 94, 0.3);
     --nav-link-hover: #21232c;
     --border-glass: rgba(255, 255, 255, 0.09);
     --border-glass-hover: rgba(255, 255, 255, 0.18);
@@ -296,7 +308,7 @@ body {
 }
 
 .btn-secondary {
-  background: #ffffff;
+  background: var(--bg-surface);
   color: var(--text-primary);
   border: 1px solid var(--border-glass);
 }
@@ -325,12 +337,13 @@ body {
   gap: 8px;
   padding: 4px 12px;
   border-radius: var(--radius-full);
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
-  color: #2563eb;
+  background: var(--bg-badge);
+  border: 1px solid var(--badge-border);
+  color: var(--badge-color);
   font-size: 12.5px;
   font-weight: 600;
   margin-bottom: 20px;
+  transition: all 0.15s ease;
 }
 
 .hero-pill .status-dot {
@@ -368,12 +381,13 @@ body {
   gap: 8px;
   padding: 6px 14px;
   border-radius: var(--radius-full);
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  color: #166534;
+  background: var(--bg-badge-success);
+  border: 1px solid var(--badge-success-border);
+  color: var(--badge-success-color);
   font-size: 13px;
   font-weight: 600;
   margin-bottom: 20px;
+  transition: all 0.15s ease;
 }
 
 .hero-buttons {
@@ -467,13 +481,14 @@ body {
   width: 38px;
   height: 38px;
   border-radius: var(--radius-sm);
-  background: #eff6ff;
+  background: var(--bg-badge);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #2563eb;
-  border: 1px solid #dbeafe;
+  color: var(--badge-color);
+  border: 1px solid var(--badge-border);
   margin-bottom: 14px;
+  transition: all 0.15s ease;
 }
 
 .feature-card h3 {
@@ -519,7 +534,7 @@ body {
 
 .download-card.highlight {
   border-color: #3b82f6;
-  background: #ffffff;
+  background: var(--bg-surface-hover);
   box-shadow: 0 4px 20px rgba(37, 99, 235, 0.12);
 }
 
@@ -592,7 +607,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: #ffffff;
+  background: var(--bg-surface);
   border: 1px solid var(--border-glass);
   color: var(--text-secondary);
   font-size: 14.5px;
@@ -623,7 +638,7 @@ body {
 }
 
 .guide-method-card {
-  background: #ffffff;
+  background: var(--bg-card);
   border: 1px solid var(--border-glass);
   border-radius: var(--radius-md);
   padding: 24px 26px;
@@ -657,15 +672,15 @@ body {
 }
 
 .tag-recommend {
-  background: #f0fdf4;
-  color: #16a34a;
-  border: 1px solid #bbf7d0;
+  background: var(--bg-badge-success);
+  color: var(--badge-success-color);
+  border: 1px solid var(--badge-success-border);
 }
 
 .tag-normal {
-  background: #eff6ff;
-  color: #2563eb;
-  border: 1px solid #bfdbfe;
+  background: var(--bg-badge);
+  color: var(--badge-color);
+  border: 1px solid var(--badge-border);
 }
 
 .steps-list {
@@ -686,8 +701,8 @@ body {
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: #eff6ff;
-  color: #2563eb;
+  background: var(--bg-badge);
+  color: var(--badge-color);
   font-size: 12px;
   font-weight: 700;
   display: flex;
@@ -695,7 +710,8 @@ body {
   justify-content: center;
   flex-shrink: 0;
   margin-top: 2px;
-  border: 1px solid #bfdbfe;
+  border: 1px solid var(--badge-border);
+  transition: all 0.15s ease;
 }
 
 .step-item strong {
@@ -704,12 +720,13 @@ body {
 
 .code-inline {
   font-family: var(--font-mono);
-  background: #f1f5f9;
+  background: var(--secondary);
   padding: 2px 6px;
   border-radius: 4px;
-  color: #0f172a;
+  color: var(--text-primary);
   font-size: 13px;
   border: 1px solid var(--border-glass);
+  transition: all 0.15s ease;
 }
 
 /* Footer */

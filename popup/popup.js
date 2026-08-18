@@ -166,16 +166,25 @@ function renderTopSegmentedModes() {
     activeProfileSubtitle.textContent = activeProfile.name;
     if (activeId === 'auto_switch') {
       headerLiveBadge.textContent = '智能分流';
-      headerLiveBadge.style.background = 'var(--accent-gradient)';
+      headerLiveBadge.style.color = 'var(--accent-primary)';
+      headerLiveBadge.style.background = 'var(--bg-badge)';
+      headerLiveBadge.style.borderColor = 'var(--border-control)';
     } else if (activeId === 'direct') {
       headerLiveBadge.textContent = '直连模式';
-      headerLiveBadge.style.background = 'var(--success)';
+      headerLiveBadge.style.color = 'var(--success)';
+      headerLiveBadge.style.background = 'color-mix(in srgb, var(--success) 15%, transparent)';
+      headerLiveBadge.style.borderColor = 'color-mix(in srgb, var(--success) 30%, transparent)';
     } else if (activeId === 'system') {
       headerLiveBadge.textContent = '系统代理';
-      headerLiveBadge.style.background = '#64748b';
+      headerLiveBadge.style.color = 'var(--text-muted)';
+      headerLiveBadge.style.background = 'color-mix(in srgb, var(--text-muted) 15%, transparent)';
+      headerLiveBadge.style.borderColor = 'color-mix(in srgb, var(--text-muted) 30%, transparent)';
     } else {
+      const color = activeProfile.color || '#3b82f6';
       headerLiveBadge.textContent = (activeProfile.scheme || '代理').toUpperCase();
-      headerLiveBadge.style.background = activeProfile.color || '#3b82f6';
+      headerLiveBadge.style.color = color;
+      headerLiveBadge.style.background = `color-mix(in srgb, ${color} 15%, transparent)`;
+      headerLiveBadge.style.borderColor = `color-mix(in srgb, ${color} 30%, transparent)`;
     }
   }
 }

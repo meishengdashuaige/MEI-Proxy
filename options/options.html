@@ -212,7 +212,7 @@
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2v6h-6"></path><path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path><path d="M3 22v-6h6"></path><path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path></svg>
               同步全部订阅
             </button>
-            <button id="btnTogglePasteImport" class="btn btn-secondary btn-toggle-import" title="粘贴 Clash YAML / Base64 / 链接列表，直接解析导入">
+            <button id="btnTogglePasteImport" class="btn btn-secondary btn-toggle-import" title="粘贴 Clash YAML 配置文件内容，直接解析导入">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
               粘贴导入
             </button>
@@ -231,10 +231,7 @@
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
               <span>添加新订阅源</span>
             </div>
-            <button id="btnTogglePasteImport" class="btn btn-secondary btn-sm btn-toggle-import" title="粘贴 Clash YAML / Base64 / 链接列表，直接解析导入">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-              <span>展开/折叠粘贴导入</span>
-            </button>
+
           </div>
           <div class="subscription-add-row">
             <input type="text" id="subNameInput" class="input-text" placeholder="订阅名称（如：主力机场）" style="flex: 0 0 160px;">
@@ -252,8 +249,8 @@
           </div>
 
           <div id="pasteImportBox" class="paste-import-box hidden" style="margin-top: 16px;">
-            <div style="font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px;">粘贴 Clash YAML / Base64 / 节点链接:</div>
-            <textarea id="pasteImportTextarea" class="input-textarea" rows="6" placeholder="支持粘贴 Clash YAML 节点定义、Base64 编码文本或单行链接列表（如 http://user:pass@host:port#节点名）"></textarea>
+            <div style="font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px;">粘贴 Clash YAML 配置文件内容:</div>
+            <textarea id="pasteImportTextarea" class="input-textarea" rows="6" placeholder="支持粘贴 Clash YAML 配置文件内容"></textarea>
             <div class="paste-import-actions">
               <input type="text" id="pasteImportNameInput" class="input-text" placeholder="分组名称（默认：粘贴导入）" style="flex: 1 1 200px;">
               <button id="btnImportPasteContent" class="btn btn-primary">解析并导入节点</button>
