@@ -185,21 +185,28 @@ async function syncAndSaveConfig(toastMsg = '设置已保存并生效') {
  * 初始化页面
  */
 async function initOptions() {
-  if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
-    chrome.runtime.sendMessage({ action: 'GET_CONFIG' }, async (res) => {
-      if (res && res.config) {
-        appConfig = res.config;
-      } else {
-        appConfig = await loadConfig();
-      }
-      renderAll();
-    });
-  } else {
+  setupEventListeners();
+
+  try {
     appConfig = await loadConfig();
     renderAll();
+  } catch (e) {
+    console.error('[MEI Proxy] Failed to load config in options:', e);
   }
 
-  setupEventListeners();
+  if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+    try {
+      chrome.runtime.sendMessage({ action: 'GET_CONFIG' }, async (res) => {
+        if (chrome.runtime.lastError) return;
+        if (res && res.config) {
+          appConfig = res.config;
+          renderAll();
+        }
+      });
+    } catch (e) {
+      // ignore
+    }
+  }
 }
 
 /**
@@ -1869,4 +1876,8 @@ function handleRemoveSubscription(subId) {
   syncAndSaveConfig('订阅已删除');
 }
 
-document.addEventListener('DOMContentLoaded', initOptions);
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initOptions);
+} else {
+  initOptions();
+}

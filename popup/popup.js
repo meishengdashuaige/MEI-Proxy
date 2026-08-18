@@ -104,13 +104,18 @@ function showToast(text, isSuccess = false) {
  * 初始化 Popup
  */
 async function initPopup() {
-  // 1. 优先直接从 Storage 读取配置完成即时首次渲染
-  currentConfig = await loadConfig();
-  updateThemeUI(currentConfig.general?.theme || 'auto');
-  renderTopSegmentedModes();
-  renderFilterPills();
-  renderNodeList();
-  populateQuickRuleTargets();
+  setupEvents();
+
+  try {
+    currentConfig = await loadConfig();
+    updateThemeUI(currentConfig.general?.theme || 'auto');
+    renderTopSegmentedModes();
+    renderFilterPills();
+    renderNodeList();
+    populateQuickRuleTargets();
+  } catch (err) {
+    console.error('[MEI Proxy] Failed to load initial config in popup:', err);
+  }
 
   // 同时向 background 发送获取最新状态
   if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
@@ -136,26 +141,36 @@ async function initPopup() {
 
   // 2. 检测当前标签页
   if (typeof chrome !== 'undefined' && chrome.tabs && chrome.tabs.query) {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs && tabs[0] && tabs[0].url) {
-        const tabUrl = tabs[0].url;
-        if (tabUrl.startsWith('http://') || tabUrl.startsWith('https://')) {
-          const info = extractDomainInfo(tabUrl);
-          currentTabDomain = info.host;
-          currentTabPattern = info.domainPattern;
-          currentDomainText.textContent = currentTabPattern;
-        } else {
-          currentDomainText.textContent = '本地/系统页面 (免代理)';
-          btnQuickAddRule.disabled = true;
-          btnQuickAddRule.style.opacity = '0.5';
+    try {
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (chrome.runtime.lastError) return;
+        if (tabs && tabs[0] && tabs[0].url) {
+          const tabUrl = tabs[0].url;
+          if (tabUrl.startsWith('http://') || tabUrl.startsWith('https://')) {
+            const info = extractDomainInfo(tabUrl);
+            currentTabDomain = info.host;
+            currentTabPattern = info.domainPattern;
+            if (currentDomainText) currentDomainText.textContent = currentTabPattern;
+          } else {
+            if (currentDomainText) currentDomainText.textContent = '本地/系统页面 (免代理)';
+            if (btnQuickAddRule) {
+              btnQuickAddRule.disabled = true;
+              btnQuickAddRule.style.opacity = '0.5';
+            }
+          }
         }
-      }
-    });
+      });
+    } catch (e) {
+      console.warn('[MEI Proxy] Tab query failed:', e);
+    }
   }
 
   // 3. 初始网络测试
-  refreshNetworkStatus();
-  setupEvents();
+  try {
+    refreshNetworkStatus();
+  } catch (e) {
+    console.warn('[MEI Proxy] refreshNetworkStatus failed:', e);
+  }
 }
 
 /**
@@ -696,4 +711,8 @@ function setupEvents() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', initPopup);
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initPopup);
+} else {
+  initPopup();
+}
