@@ -114,16 +114,24 @@ async function initPopup() {
 
   // 同时向 background 发送获取最新状态
   if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
-    chrome.runtime.sendMessage({ action: 'GET_CONFIG' }, (response) => {
-      if (response && response.config) {
-        currentConfig = response.config;
-        updateThemeUI(currentConfig.general?.theme || 'auto');
-        renderTopSegmentedModes();
-        renderFilterPills();
-        renderNodeList();
-        populateQuickRuleTargets();
-      }
-    });
+    try {
+      chrome.runtime.sendMessage({ action: 'GET_CONFIG' }, (response) => {
+        if (chrome.runtime.lastError) {
+          console.warn('[MEI Proxy] Background script not reachable:', chrome.runtime.lastError.message);
+          return;
+        }
+        if (response && response.config) {
+          currentConfig = response.config;
+          updateThemeUI(currentConfig.general?.theme || 'auto');
+          renderTopSegmentedModes();
+          renderFilterPills();
+          renderNodeList();
+          populateQuickRuleTargets();
+        }
+      });
+    } catch (err) {
+      console.warn('[MEI Proxy] Failed to send message to background:', err);
+    }
   }
 
   // 2. 检测当前标签页
