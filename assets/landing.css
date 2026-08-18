@@ -654,15 +654,29 @@ body {
   .nav-wrapper {
     display: flex;
     justify-content: space-between;
+    align-items: center;
   }
   .nav-center {
     display: none;
   }
+  .nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
   .btn-github {
-    display: none;
+    display: inline-flex;
+    padding: 6px 10px;
+    font-size: 12px;
+    gap: 4px;
+  }
+  .btn-nav-download {
+    padding: 6px 12px;
+    font-size: 12px;
+    gap: 4px;
   }
   .hero-title {
-    font-size: 32px;
+    font-size: 30px;
   }
   .hero-buttons {
     flex-direction: column;
@@ -677,3 +691,16 @@ body {
     width: 100%;
   }
 }
+
+@media (max-width: 400px) {
+  .brand-badge {
+    display: none;
+  }
+  .btn-github span {
+    display: none;
+  }
+  .btn-github {
+    padding: 6px 8px;
+  }
+}
+
