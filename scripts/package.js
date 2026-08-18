@@ -36,6 +36,7 @@ const filesToInclude = [
   'lib/preset_rules.js',
   'lib/storage.js',
   'lib/subscription.js',
+  'lib/theme.js',
   'lib/utils.js',
   'icons/icon16.png',
   'icons/icon32.png',
