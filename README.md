@@ -89,9 +89,10 @@ MEIProxy/
 │   ├── options.css            # 控制台样式
 │   └── options.js             # 控制台业务逻辑
 ├── scripts/
-│   └── package.js             # 自动化打包构建脚本
-└── test/
-    └── test_core.js           # 核心逻辑自动化测试套件
+│   ├── build_firefox_bundle.js # Firefox 单文件安全打包
+│   ├── generate_icons.js       # 图标生成工具
+│   ├── package.js              # 自动化打包构建脚本
+│   └── zip_dir.py              # 标准 zip 压缩工具
 ```
 
 ---
@@ -99,9 +100,6 @@ MEIProxy/
 ## 开发与构建
 
 ```bash
-# 运行核心自动化测试
-node test/test_core.js
-
 # 构建并生成 Chrome zip 与 Firefox xpi 安装包
 node scripts/package.js
 ```

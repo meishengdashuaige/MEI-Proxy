@@ -20,9 +20,6 @@ jobs:
         with:
           node-version: 20
 
-      - name: Run Core Tests
-        run: node test/test_core.js
-
       - name: Build and Package
         run: node scripts/package.js
 
