@@ -5,29 +5,29 @@
 }
 
 :root {
-  --bg-dark: #0b0f19;
-  --bg-surface: rgba(17, 24, 39, 0.75);
-  --bg-surface-hover: rgba(30, 41, 59, 0.85);
-  --bg-card: rgba(255, 255, 255, 0.03);
-  --border-glass: rgba(255, 255, 255, 0.08);
-  --border-glass-hover: rgba(99, 102, 241, 0.4);
-  --primary: #4f46e5;
-  --primary-light: #6366f1;
-  --primary-glow: rgba(99, 102, 241, 0.25);
-  --secondary: #3b82f6;
-  --accent-cyan: #06b6d4;
-  --accent-gradient: linear-gradient(135deg, #6366f1 0%, #3b82f6 100%);
-  --text-primary: #f1f5f9;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-  --success: #10b981;
+  --bg-dark: #111215;
+  --bg-surface: #18191e;
+  --bg-surface-hover: #212228;
+  --bg-card: #18191e;
+  --border-glass: #282932;
+  --border-glass-hover: #3a3b47;
+  --primary: #2563eb;
+  --primary-light: #3b82f6;
+  --primary-glow: rgba(59, 130, 246, 0.15);
+  --secondary: #222329;
+  --accent-cyan: #38bdf8;
+  --accent-gradient: #3b82f6;
+  --text-primary: #f4f4f6;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
+  --success: #22c55e;
   --warning: #f59e0b;
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 18px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
   --radius-full: 9999px;
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'JetBrains Mono', Consolas, monospace;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, Menlo, Monaco, Consolas, monospace;
 }
 
 body {
@@ -37,10 +37,6 @@ body {
   line-height: 1.6;
   overflow-x: hidden;
   position: relative;
-  background-image: 
-    radial-gradient(circle at 20% 15%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
-    radial-gradient(circle at 80% 25%, rgba(59, 130, 246, 0.08) 0%, transparent 40%);
-  background-attachment: fixed;
 }
 
 .container {
@@ -54,10 +50,10 @@ body {
   position: sticky;
   top: 0;
   z-index: 100;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  background: rgba(11, 15, 25, 0.85);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(17, 18, 21, 0.9);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-glass);
 }
 
 .nav-wrapper {
@@ -79,8 +75,7 @@ body {
 .brand-icon {
   width: 32px;
   height: 32px;
-  border-radius: 8px;
-  box-shadow: 0 0 12px rgba(99, 102, 241, 0.35);
+  border-radius: var(--radius-sm);
 }
 
 .brand-text {
@@ -90,7 +85,7 @@ body {
 }
 
 .brand-name {
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 700;
   color: #fff;
   letter-spacing: -0.3px;
@@ -101,10 +96,10 @@ body {
   font-weight: 600;
   font-family: var(--font-mono);
   padding: 1px 7px;
-  border-radius: var(--radius-full);
-  background: rgba(99, 102, 241, 0.15);
-  color: #a5b4fc;
-  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: 4px;
+  background: #1e222b;
+  color: #93c5fd;
+  border: 1px solid #2b3345;
 }
 
 .nav-center {
@@ -116,26 +111,26 @@ body {
   align-items: center;
   gap: 4px;
   list-style: none;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #18191e;
+  border: 1px solid var(--border-glass);
   border-radius: var(--radius-full);
-  padding: 4px 6px;
+  padding: 3px 5px;
 }
 
 .nav-links a.nav-link {
   color: var(--text-secondary);
   text-decoration: none;
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 500;
-  padding: 5px 16px;
+  padding: 4px 14px;
   border-radius: var(--radius-full);
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
   display: inline-block;
 }
 
 .nav-links a.nav-link:hover {
   color: #fff;
-  background: rgba(255, 255, 255, 0.08);
+  background: #23242a;
 }
 
 .nav-actions {
@@ -146,45 +141,44 @@ body {
 }
 
 .btn-github {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #18191e;
+  border: 1px solid var(--border-glass);
   color: var(--text-secondary);
-  padding: 7px 14px;
-  font-size: 13px;
+  padding: 6px 12px;
+  font-size: 12.5px;
   font-weight: 500;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   display: inline-flex;
   align-items: center;
   gap: 6px;
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
 }
 
 .btn-github:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: #23242a;
   color: #fff;
-  border-color: rgba(255, 255, 255, 0.25);
-  transform: translateY(-1px);
+  border-color: var(--border-glass-hover);
 }
 
 .btn-nav-download {
-  padding: 7px 16px;
-  font-size: 13px;
-  font-weight: 600;
-  border-radius: var(--radius-md);
-  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  padding: 6px 14px;
+  font-size: 12.5px;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  background: #2563eb;
   color: #fff;
-  box-shadow: 0 2px 10px rgba(99, 102, 241, 0.35);
+  border: 1px solid #3b82f6;
   display: inline-flex;
   align-items: center;
   gap: 6px;
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
 }
 
 .btn-nav-download:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.5);
+  background: #1d4ed8;
+  border-color: #2563eb;
 }
 
 /* Buttons */
@@ -245,25 +239,25 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 5px 14px;
+  padding: 4px 12px;
   border-radius: var(--radius-full);
-  background: rgba(99, 102, 241, 0.1);
-  border: 1px solid rgba(99, 102, 241, 0.25);
-  color: #a5b4fc;
-  font-size: 13px;
+  background: #18202b;
+  border: 1px solid #253347;
+  color: #93c5fd;
+  font-size: 12.5px;
   font-weight: 500;
   margin-bottom: 20px;
 }
 
 .hero-pill .status-dot {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: var(--success);
 }
 
 .hero-title {
-  font-size: 44px;
+  font-size: 42px;
   font-weight: 800;
   line-height: 1.25;
   letter-spacing: -1px;
@@ -272,16 +266,14 @@ body {
 }
 
 .hero-title span {
-  background: var(--accent-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #3b82f6;
 }
 
 .hero-desc {
-  font-size: 17px;
+  font-size: 16px;
   color: var(--text-secondary);
   max-width: 620px;
-  margin: 0 auto 32px;
+  margin: 0 auto 30px;
   line-height: 1.6;
 }
 
@@ -290,13 +282,13 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 16px;
+  padding: 6px 14px;
   border-radius: var(--radius-full);
-  background: rgba(16, 185, 129, 0.1);
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  color: #6ee7b7;
-  font-size: 13.5px;
-  font-weight: 600;
+  background: #17221b;
+  border: 1px solid #213828;
+  color: #86efac;
+  font-size: 13px;
+  font-weight: 500;
   margin-bottom: 20px;
 }
 
@@ -304,15 +296,14 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 14px;
   flex-wrap: wrap;
-  margin-bottom: 32px;
+  margin-bottom: 30px;
 }
 
 .btn-recommend {
   position: relative;
-  border: 1px solid rgba(99, 102, 241, 0.8);
-  box-shadow: 0 0 20px var(--primary-glow);
+  border: 1px solid #3b82f6;
 }
 
 .hero-stats {
@@ -323,7 +314,7 @@ body {
   flex-wrap: wrap;
   padding: 10px 0;
   color: var(--text-muted);
-  font-size: 13.5px;
+  font-size: 13px;
 }
 
 .hero-stats span {
@@ -338,17 +329,17 @@ body {
 
 /* Features */
 .features {
-  padding: 60px 0;
+  padding: 50px 0;
 }
 
 .section-header {
   text-align: center;
   max-width: 600px;
-  margin: 0 auto 40px;
+  margin: 0 auto 36px;
 }
 
 .section-tag {
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
   color: var(--primary-light);
   text-transform: uppercase;
@@ -357,103 +348,102 @@ body {
 }
 
 .section-title {
-  font-size: 30px;
+  font-size: 28px;
   font-weight: 800;
   letter-spacing: -0.5px;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   color: #fff;
 }
 
 .section-desc {
-  font-size: 15px;
+  font-size: 14px;
   color: var(--text-secondary);
 }
 
 .features-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 20px;
+  gap: 18px;
 }
 
 .feature-card {
   background: var(--bg-surface);
   border: 1px solid var(--border-glass);
   border-radius: var(--radius-md);
-  padding: 26px 24px;
-  transition: all 0.2s ease;
+  padding: 22px 20px;
+  transition: border-color 0.15s ease;
 }
 
 .feature-card:hover {
   border-color: var(--border-glass-hover);
-  transform: translateY(-2px);
 }
 
 .feature-icon {
-  width: 42px;
-  height: 42px;
+  width: 38px;
+  height: 38px;
   border-radius: var(--radius-sm);
-  background: rgba(99, 102, 241, 0.12);
+  background: #1e222b;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #818cf8;
-  margin-bottom: 16px;
+  color: #60a5fa;
+  border: 1px solid #2a3142;
+  margin-bottom: 14px;
 }
 
 .feature-card h3 {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   color: #fff;
 }
 
 .feature-card p {
   color: var(--text-secondary);
-  font-size: 14px;
+  font-size: 13.5px;
   line-height: 1.55;
 }
 
 /* Download Section */
 .download-section {
-  padding: 60px 0;
+  padding: 50px 0;
 }
 
 .download-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 28px;
+  gap: 24px;
   max-width: 860px;
   margin: 0 auto;
-  padding-top: 14px;
+  padding-top: 10px;
 }
 
 .download-card {
   background: var(--bg-surface);
   border: 1px solid var(--border-glass);
   border-radius: var(--radius-lg);
-  padding: 34px 28px;
+  padding: 28px 24px;
   text-align: center;
   position: relative;
-  transition: all 0.25s ease;
+  transition: all 0.15s ease;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
 
 .download-card.highlight {
-  border-color: rgba(99, 102, 241, 0.8);
-  background: rgba(22, 30, 54, 0.95);
-  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.4), 0 0 24px rgba(99, 102, 241, 0.25);
-  transform: translateY(-2px);
+  border-color: #3b82f6;
+  background: #191d26;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
 }
 
 .card-recommend-badge {
   position: absolute;
-  top: -12px;
+  top: -11px;
   right: 20px;
-  background: var(--accent-gradient);
+  background: #2563eb;
   color: #fff;
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 700;
   padding: 3px 12px;
   border-radius: var(--radius-full);
