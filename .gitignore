@@ -4,4 +4,6 @@ Thumbs.db
 *.log
 .system_generated/
 .workbuddy/
+demo/
+scratch/
 

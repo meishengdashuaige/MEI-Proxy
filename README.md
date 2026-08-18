@@ -1,98 +1,112 @@
 # MEI Proxy
 
-**MEI Proxy** 是一款现代化、高颜值且功能强大的浏览器代理管理扩展插件，全面兼容 **Chromium**（Chrome / Edge / Brave / Vivaldi 等）与 **Firefox**（Gecko）浏览器内核，旨在为开发者和重度网络用户提供丝滑、稳定、高效的代理切换与智能分流体验。
+MEI Proxy 是一个轻量、高效的浏览器代理管理与智能分流扩展，支持 **Chromium**（Chrome / Edge / Brave / Vivaldi 等）与 **Firefox**（Gecko）浏览器。
 
 ---
 
-## 🌟 核心特性
+## 核心功能
 
-1. **多种代理模式全面支持**：
-   - **直接连接 (Direct)**：所有网络请求直连目标服务器。
-   - **系统代理 (System)**：无缝遵循操作系统默认网络代理设置。
-   - **固定代理节点 (Fixed Server)**：全面支持 **HTTP**、**HTTPS**、**SOCKS4**、**SOCKS5** 协议，支持主机、端口及账号密码鉴权。
-   - **智能分流路由 (Auto Switch)**：依据预设的域名通配符、正则表达式、关键词或精确匹配规则，全自动分流网络流量（首条命中原则）。
-   - **自定义 PAC 脚本**：支持远程 PAC 订阅 URL 及内置 JS PAC 脚本编辑器。
+### 1. 代理模式
+- **直接连接 (Direct)**：不使用代理，所有网络请求直连目标服务器。
+- **系统代理 (System)**：遵循操作系统默认的网络代理设置。
+- **固定代理节点 (Fixed Server)**：支持 **HTTP**、**HTTPS**、**SOCKS4**、**SOCKS5** 协议，支持主机、端口及账号密码鉴权。
+- **智能分流路由 (Auto Switch)**：支持通配符（如 `*.google.com`）、关键词和正则表达式规则，按列表自上而下匹配分流；未命中规则走默认回退动作。
+- **自定义 PAC 脚本**：支持加载远程 PAC 脚本 URL，或在内置编辑器中编写自定义 PAC JavaScript 代码。
 
-2. **节点订阅管理与多协议解析引擎**：
-   - **多格式订阅解析**：支持直接输入订阅链接 URL 或粘贴 Base64 订阅内容、V2rayN 协议（VMess / VLESS / Trojan / SS / SSR）、纯链接列表（`http://`, `https://`, `socks5://`）及 Clash YAML 配置文件。
-   - **浏览器原生代理（关键限制）**：浏览器 `chrome.proxy` / `browser.proxy` API **仅支持 HTTP / HTTPS / SOCKS4 / SOCKS5 传输层代理协议**。
-     - ✅ 订阅中上述协议的节点可直接被浏览器代理，**无需任何第三方代理软件**。
-     - ⚠️ VMess / VLESS / Trojan / Shadowsocks / SSR 等加密协议节点**无法被浏览器直接代理**——这些协议需要由本地客户端（V2Ray / Xray / Clash / sing-box 等）转换为本地 SOCKS5/HTTP 端口后，再在 MEIProxy 中新建一个指向 `127.0.0.1:<客户端端口>` 的节点才能使用。
-     - MEIProxy 会自动识别每个订阅节点的原始协议并标注可用性：对加密协议节点禁用"激活"按钮、在 PAC 编译时让指向该节点的规则回退到直连，避免无效代理导致请求失败。
-   - **订阅后台自动更新**：基于 `chrome.alarms` 实现后台非阻塞定时静默同步。
-   - **一键批量并发测速**：一键对所有"可直接代理"的订阅节点并发测试延时（Ping 毫秒数），自动标注优劣；加密协议节点因浏览器无法直连而自动跳过。
+### 2. 节点订阅与自动分组
+- **多格式订阅解析**：支持输入订阅链接或直接粘贴 Base64 订阅内容、Clash YAML 配置及链接列表。
+- **自动分组隔离**：自动根据订阅源将节点归入不同组别，支持组别筛选与管理。
+- **定时自动同步**：基于后台 Alarms 机制定时更新订阅节点。
 
-3. **常用规则集一键导入与模板存储**：
-   - 内置 **AI 智能与全球开发**、**全球流媒体与社交**、**中国大陆直连白名单**、**广告与隐私追踪屏蔽**等多套精品规则集。
-   - 支持实时规则预览、增量追加/全量覆盖与自定义规则模板存储。
+### 3. 纯直连测速与分组选优
+- **测速强制直连**：测速探针强制直连，不经过自身代理，避免代理流量回环影响测速准确性。
+- **分组优先测速**：在选项页和 Popup 弹窗中测速时，优先在当前选中的分组内进行并发测速与选优切换。
 
-4. **精美 Popup 快捷菜单**：
-   - 一键快速切换代理模式与节点，支持按订阅源分组筛选。
-   - 实时出口 IP 归属地检测与节点网络延迟测速。
-   - **一键分流**：自动识别当前访问标签页的顶级域名，一键将其加入智能分流规则。
+### 4. 协议兼容性与提示
+- **原生直连协议**：HTTP / HTTPS / SOCKS4 / SOCKS5 可直接被浏览器底层代理，**无需在本地运行任何第三方客户端**。
+- **隧道加密协议**：VMess / VLESS / Trojan / Shadowsocks / SSR 等复杂协议浏览器原生无法直接建立连接。扩展会自动识别并标注「需客户端」，在本地客户端（如 Clash / V2Ray / Xray）转换为本地端口后添加即可使用。
+- **Ghelper 专线支持**：Firefox 完整支持通过 `browser.proxy.onRequest` 主动注入认证使用 Ghelper 节点。
 
----
+### 5. 规则沙盒模拟器与预置规则集
+- **分流沙盒测试**：在规则页输入任意 URL，实时测试其命中哪条规则以及最终路由给哪个代理节点。
+- **精品规则集导入**：内置 AI 平台、开发工具、全球流媒体与国内白名单等多套常用规则集，可一键导入。
 
-## 🚀 安装指南
-
-### 1. Chromium 浏览器 (Google Chrome / Microsoft Edge / Brave / Vivaldi 等)
-1. 打开浏览器扩展管理页面（例如 Chrome 地址栏输入 `chrome://extensions/`，Edge 输入 `edge://extensions/`）。
-2. 开启右上角的 **「开发者模式」 (Developer Mode)**。
-3. 点击 **「加载已解压的扩展程序」 (Load unpacked)**。
-4. 选择本项目目录 `MEIProxy` 即可完成安装并立即使用。
-
-### 2. Firefox 浏览器 (Firefox / Floorp / Zen / Waterfox 等)
-1. 打开 Firefox 地址栏输入 `about:debugging#/runtime/this-firefox`。
-2. 点击 **「临时载入附加组件」 (Load Temporary Add-on)**。
-3. 选择 `manifest.json` 文件或 `dist/MEI-Proxy-Firefox.zip` 即可完成载入。
+### 6. 数据安全与备份
+- **100% 本地存储**：所有节点、订阅和规则均保存在浏览器本地 Storage 中，不向任何服务器上传数据。
+- **一键导入/导出**：支持将所有配置导出为 JSON 备份文件，方便跨浏览器或跨设备迁移。
 
 ---
 
-## 📖 使用指南
+## 协议支持说明
 
-### 1. 快捷切换与当前网站加规则 (Popup)
-- 点击浏览器工具栏的 **MEIProxy 图标** 打开快捷菜单。
-- 单击列表中任意节点或模式（如「智能分流」或「直接连接」），即刻生效。
-- 访问任意海外或内网网站时，点击底部的 **「加入分流」**，即可将该域名永久分配至指定代理。
-
-### 2. 管理代理节点与分流规则 (Options Dashboard)
-- 在 Popup 菜单右上角点击 **⚙️ 设置图标**，或右键扩展图标选择 **「选项」** 打开仪表盘。
-- **添加新节点**：在「代理节点管理」中点击「新建代理节点」，选择协议类型（如 SOCKS5）并填入 `127.0.0.1:10808`。
-- **调试分流规则**：在「智能分流规则」页面中的沙盒测试框中输入任意网址（例如 `https://api.openai.com/v1`），点击「模拟测试」即可实时验证分流流向。
+| 协议类型 | 浏览器直接使用 | 说明 |
+| :--- | :--- | :--- |
+| **HTTP / HTTPS** | 支持 | 浏览器底层原生支持，支持账号密码鉴权 |
+| **SOCKS4 / SOCKS5** | 支持 | 浏览器底层原生支持（TCP 代理） |
+| **VMess / VLESS / Trojan / SS** | 需本地客户端 | 复杂加密隧道，需在本地启动客户端转换出 HTTP/SOCKS 端口后接入 |
 
 ---
 
-## 🛠️ 项目目录结构
+## 安装方法
+
+### 1. Chrome / Edge / Chromium 内核浏览器
+1. 下载 `dist/MEI-Proxy-Chrome.zip` 并解压。
+2. 打开浏览器扩展页面（Chrome 输入 `chrome://extensions/`，Edge 输入 `edge://extensions/`）。
+3. 开启右上角 **「开发者模式」**。
+4. 点击 **「加载已解压的扩展程序」**，选择解压出的文件夹即可。
+
+### 2. Firefox / Gecko 内核浏览器
+- **长期使用（推荐开发者版 / Floorp / Zen / Nightly）**：
+  1. 在 `about:config` 中将 `xpinstall.signatures.required` 设为 `false`。
+  2. 将 `dist/MEI-Proxy-Firefox.xpi` 直接拖入浏览器窗口完成安装。
+- **临时调试使用（标准版 Firefox）**：
+  1. 打开 `about:debugging#/runtime/this-firefox`。
+  2. 点击 **「临时载入附加组件」**，选择解压目录下的 `manifest.json` 或 `dist/MEI-Proxy-Firefox.zip`。
+
+---
+
+## 项目结构
 
 ```
 MEIProxy/
-├── manifest.json              # Chrome Manifest V3 扩展清单
-├── background.js              # 后台 Service Worker (chrome.proxy 调度与角标状态)
-├── icons/                     # 高清矢量与各尺寸图标
-│   ├── icon.svg
-│   ├── icon16.png
-│   ├── icon32.png
-│   ├── icon48.png
-│   └── icon128.png
+├── manifest.json              # 扩展配置文件 (Manifest V3)
+├── background.js              # 后台 Service Worker (代理调度与订阅同步)
+├── index.html                 # 官方介绍与下载页面
+├── assets/                    # 官网静态资源
+├── icons/                     # 扩展图标
 ├── lib/
-│   ├── pac_builder.js         # 高性能动态 PAC 脚本编译引擎
-│   ├── storage.js             # 本地配置持久化与默认模板
-│   └── utils.js               # 延时测速、IP 查询与规则沙盒模拟器
+│   ├── pac_builder.js         # PAC 脚本编译引擎
+│   ├── preset_rules.js        # 预置分流规则集数据
+│   ├── storage.js             # 本地配置存储管理
+│   ├── subscription.js        # 订阅解析引擎 (Base64 / Clash YAML / 链接)
+│   └── utils.js               # 工具函数 (测速、IP 查询、沙盒匹配、协议检测)
 ├── popup/
 │   ├── popup.html             # 快捷切换弹出面板
-│   ├── popup.css              # 毛玻璃与暗黑/明亮主题样式
-│   └── popup.js               # 弹窗交互控制逻辑
+│   ├── popup.css              # 弹出面板样式
+│   └── popup.js               # 弹出面板交互逻辑
 ├── options/
-│   ├── options.html           # 完整设置与管理控制台
-│   ├── options.css            # 响应式后台仪表盘样式
-│   └── options.js             # 节点、规则增删改查与备份还原逻辑
-├── test/
-│   └── test_core.js           # 核心逻辑自动化测试套件
-└── README.md                  # 说明文档
+│   ├── options.html           # 完整管理控制台 (节点/订阅/规则/PAC/备份)
+│   ├── options.css            # 控制台样式
+│   └── options.js             # 控制台业务逻辑
+├── scripts/
+│   └── package.js             # 自动化打包构建脚本
+└── test/
+    └── test_core.js           # 核心逻辑自动化测试套件
 ```
 
 ---
 
-## ⚖️ 许可与规范
-- 基于 **Google Chrome Extensions Manifest V3** 标准。
-- 零第三方重型依赖，轻量极速，完全开源透明。
+## 开发与构建
+
+```bash
+# 运行核心自动化测试
+node test/test_core.js
+
+# 构建并生成 Chrome zip 与 Firefox xpi 安装包
+node scripts/package.js
+```
+
+---
+
+## 许可证
+开源项目，基于 MIT 协议。
