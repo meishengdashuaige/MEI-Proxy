@@ -1559,25 +1559,25 @@ input:checked + .slider:before {
 }
 
 .sub-badge-count {
-  background: #eff6ff;
-  color: #2563eb;
-  border: 1px solid #bfdbfe;
+  background: var(--badge-blue-bg);
+  color: var(--badge-blue-color);
+  border: 1px solid var(--badge-blue-border);
 }
 
 .sub-badge-usable {
-  background: #f0fdf4;
-  color: #16a34a;
-  border: 1px solid #bbf7d0;
+  background: var(--badge-green-bg);
+  color: var(--badge-green-color);
+  border: 1px solid var(--badge-green-border);
 }
 
 .sub-badge-time {
-  background: #f8fafc;
+  background: var(--bg-tag-default);
   color: var(--text-muted);
   border: 1px solid var(--border-color);
 }
 
 .sub-badge-auto {
-  background: #f8fafc;
+  background: var(--bg-tag-default);
   color: var(--text-secondary);
   border: 1px solid var(--border-color);
 }
