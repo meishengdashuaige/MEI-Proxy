@@ -35,6 +35,7 @@ const filesToInclude = [
   'lib/pac_builder.js',
   'lib/preset_rules.js',
   'lib/storage.js',
+  'lib/subscription.js',
   'lib/utils.js',
   'icons/icon16.png',
   'icons/icon32.png',

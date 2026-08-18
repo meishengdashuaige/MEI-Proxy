@@ -3,8 +3,8 @@
  * Features: Star Favorites, Batch Latency & Zero Emojis (Pure SVG)
  */
 
-import { extractDomainInfo, fetchCurrentIpInfo, measureLatency } from '../lib/utils.js';
-import { saveConfig } from '../lib/storage.js';
+import { extractDomainInfo, fetchCurrentIpInfo, measureLatency, isProfileDirectlyUsable, getProtocolDisplay } from '../lib/utils.js';
+import { loadConfig, saveConfig } from '../lib/storage.js';
 
 let currentConfig = null;
 let currentTabDomain = '';
@@ -22,6 +22,17 @@ const SVG_ICONS = {
   link: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>`,
   check: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`
 };
+
+/**
+ * 简单 HTML 转义
+ */
+function escapeHtmlText(str) {
+  return String(str == null ? '' : str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
 
 // DOM Elements
 const activeProfileSubtitle = document.getElementById('activeProfileSubtitle');
@@ -70,19 +81,28 @@ function showToast(text, isSuccess = false) {
  * 初始化 Popup
  */
 async function initPopup() {
-  // 1. 获取配置
-  chrome.runtime.sendMessage({ action: 'GET_CONFIG' }, (response) => {
-    if (response && response.config) {
-      currentConfig = response.config;
-      renderTopSegmentedModes();
-      renderFilterPills();
-      renderNodeList();
-      populateQuickRuleTargets();
-    }
-  });
+  // 1. 优先直接从 Storage 读取配置完成即时首次渲染，避免等待后台消息
+  currentConfig = await loadConfig();
+  renderTopSegmentedModes();
+  renderFilterPills();
+  renderNodeList();
+  populateQuickRuleTargets();
+
+  // 同时向 background 发送获取最新状态
+  if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+    chrome.runtime.sendMessage({ action: 'GET_CONFIG' }, (response) => {
+      if (response && response.config) {
+        currentConfig = response.config;
+        renderTopSegmentedModes();
+        renderFilterPills();
+        renderNodeList();
+        populateQuickRuleTargets();
+      }
+    });
+  }
 
   // 2. 检测当前标签页
-  if (chrome.tabs && chrome.tabs.query) {
+  if (typeof chrome !== 'undefined' && chrome.tabs && chrome.tabs.query) {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs && tabs[0] && tabs[0].url) {
         const tabUrl = tabs[0].url;
@@ -149,7 +169,7 @@ function renderFilterPills() {
 
   fixedProfiles.forEach(p => {
     if (p.favorite) favCount++;
-    customCount++;
+    if (!p.subId || p.subId === 'custom') customCount++;
   });
 
   filterPillsBar.innerHTML = '';
@@ -177,6 +197,18 @@ function renderFilterPills() {
     filterPillsBar.appendChild(pillCustom);
   }
 
+  // 4. 各个订阅源分组专属 Pill
+  const subs = currentConfig.subscriptions || [];
+  subs.forEach(sub => {
+    const subNodes = fixedProfiles.filter(p => p.subId === sub.id);
+    if (subNodes.length > 0) {
+      const pillSub = document.createElement('button');
+      pillSub.className = `filter-pill ${activeFilterType === sub.id ? 'active' : ''}`;
+      pillSub.dataset.filter = sub.id;
+      pillSub.innerHTML = `${SVG_ICONS.link}<span>${escapeHtmlText(sub.name || '订阅')} (${subNodes.length})</span>`;
+      filterPillsBar.appendChild(pillSub);
+    }
+  });
 
   // 绑定点击事件
   filterPillsBar.querySelectorAll('.filter-pill').forEach(btn => {
@@ -190,33 +222,10 @@ function renderFilterPills() {
 }
 
 /**
- * 判断节点是否可被浏览器原生代理直接使用
- * 对缺少 directlyUsable 字段的旧配置做向后兼容
- */
-function isProfileDirectlyUsable(profile) {
-  if (!profile || profile.type !== 'fixed') return true;
-  if (typeof profile.directlyUsable === 'boolean') return profile.directlyUsable;
-  const proto = (profile.protocol || profile.scheme || 'http').toLowerCase();
-  return ['http', 'https', 'socks5', 'socks4', 'socks'].includes(proto);
-}
-
-/**
- * 返回不可用节点的友好协议名
+ * 返回节点的友好协议名
  */
 function getProtocolLabel(profile) {
-  const proto = (profile.protocol || profile.scheme || '').toLowerCase();
-  const labels = {
-    vmess: 'VMess',
-    vless: 'VLESS',
-    trojan: 'Trojan',
-    ss: 'Shadowsocks',
-    ssr: 'SSR',
-    http: 'HTTP',
-    https: 'HTTPS',
-    socks5: 'SOCKS5',
-    socks4: 'SOCKS4'
-  };
-  return labels[proto] || proto.toUpperCase();
+  return getProtocolDisplay(profile);
 }
 
 /**
@@ -232,6 +241,10 @@ function renderNodeList() {
   // 1. 按订阅或收藏过滤
   const filtered = fixedProfiles.filter(p => {
     if (activeFilterType === 'FAV' && !p.favorite) return false;
+    if (activeFilterType === 'CUSTOM' && p.subId && p.subId !== 'custom') return false;
+    if (activeFilterType !== 'ALL' && activeFilterType !== 'FAV' && activeFilterType !== 'CUSTOM') {
+      if (p.subId !== activeFilterType) return false;
+    }
 
     // 搜索词过滤
     if (activeSearchQuery) {
@@ -239,7 +252,8 @@ function renderNodeList() {
       const matchName = p.name && p.name.toLowerCase().includes(q);
       const matchHost = p.host && p.host.toLowerCase().includes(q);
       const matchPort = p.port && String(p.port).includes(q);
-      if (!matchName && !matchHost && !matchPort) return false;
+      const matchSub = p.subName && p.subName.toLowerCase().includes(q);
+      if (!matchName && !matchHost && !matchPort && !matchSub) return false;
     }
 
     return true;
@@ -292,6 +306,11 @@ function renderNodeList() {
     const protoLabel = getProtocolLabel(profile);
     const warnTag = usable ? '' : `<span class="node-warn-tag" title="此节点为 ${protoLabel} 协议，浏览器无法直接代理，需本地客户端转换">需客户端</span>`;
 
+    // 订阅分组展示
+    const sub = profile.subId ? (currentConfig.subscriptions || []).find(s => s.id === profile.subId) : null;
+    const subName = sub ? sub.name : (profile.subName && profile.subName !== 'custom' ? profile.subName : '');
+    const groupTag = subName ? `<span class="node-group-badge" title="所属订阅: ${escapeHtmlText(subName)}">${escapeHtmlText(subName)}</span>` : '';
+
     item.innerHTML = `
       <div class="node-left">
         <button class="star-btn ${profile.favorite ? 'starred' : ''}" data-id="${profile.id}" title="${profile.favorite ? '取消收藏' : '加入收藏'}">
@@ -301,7 +320,10 @@ function renderNodeList() {
           ${SVG_ICONS.server}
         </div>
         <div class="node-meta">
-          <span class="node-name" title="${profile.name}${!usable ? ' · ' + protoLabel + ' 协议需本地客户端' : ''}">${profile.name}</span>
+          <div style="display: flex; align-items: center; gap: 4px;">
+            <span class="node-name" title="${profile.name}${!usable ? ' · ' + protoLabel + ' 协议需本地客户端' : ''}">${profile.name}</span>
+            ${groupTag}
+          </div>
           <span class="node-server-sub">${profile.host}:${profile.port}</span>
         </div>
       </div>
@@ -383,27 +405,40 @@ function switchProfile(profileId) {
 }
 
 /**
- * 测速并自动选优
+ * 测速并自动选优 (优先在当前所选分类/分组中测速选优)
  */
 async function handleSelectFastest() {
-  btnSelectFastest.disabled = true;
-  btnSelectFastest.innerHTML = '<span>测速中...</span>';
-  showToast('正在测速所有可用节点...');
-
-  // 仅对浏览器原生可代理的节点测速——加密协议节点（VMess/VLESS/Trojan/SS/SSR）
-  // 浏览器直连必然失败，测速无意义
   const fixedProfiles = currentConfig.profiles.filter(p => p.type === 'fixed' && isProfileDirectlyUsable(p));
-  if (fixedProfiles.length === 0) {
-    showToast('当前没有可直接代理的节点 (HTTP/HTTPS/SOCKS4/SOCKS5)，请先添加本地客户端端口或可直连代理节点');
-    btnSelectFastest.disabled = false;
-    btnSelectFastest.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> <span>测速选优</span>';
+  
+  // 按照当前所选分类（ALL / FAV / CUSTOM / subId）筛选候选测速节点
+  let candidates = fixedProfiles;
+  let groupTitle = '全部可用节点';
+  if (activeFilterType === 'FAV') {
+    candidates = fixedProfiles.filter(p => p.favorite);
+    groupTitle = '常用收藏';
+  } else if (activeFilterType === 'CUSTOM') {
+    candidates = fixedProfiles.filter(p => !p.subId || p.subId === 'custom');
+    groupTitle = '默认与手动节点';
+  } else if (activeFilterType !== 'ALL') {
+    const sub = (currentConfig.subscriptions || []).find(s => s.id === activeFilterType);
+    const subName = sub ? sub.name : '当前分组';
+    candidates = fixedProfiles.filter(p => p.subId === activeFilterType);
+    groupTitle = `分组「${subName}」`;
+  }
+
+  if (candidates.length === 0) {
+    showToast(`当前${groupTitle}下暂无可测速的直连节点`);
     return;
   }
+
+  btnSelectFastest.disabled = true;
+  btnSelectFastest.innerHTML = '<span>测速中...</span>';
+  showToast(`正在对 ${groupTitle} (${candidates.length} 个节点) 进行直连测速...`);
 
   let bestNode = null;
   let minLatency = 999999;
 
-  await Promise.all(fixedProfiles.map(async (p) => {
+  await Promise.all(candidates.map(async (p) => {
     const pingEl = document.getElementById(`ping-${p.id}`);
     if (pingEl) pingEl.textContent = '...';
 
@@ -421,9 +456,9 @@ async function handleSelectFastest() {
 
   if (bestNode) {
     switchProfile(bestNode.id);
-    showToast(`已选优切换至: ${bestNode.name} (${minLatency}ms)`, true);
+    showToast(`已选优切换至: ${bestNode.name} (${minLatency} ms)`, true);
   } else {
-    showToast('所有节点均超时或不可达');
+    showToast(`${groupTitle}节点测速均超时`);
   }
 
   btnSelectFastest.disabled = false;
@@ -445,7 +480,7 @@ function populateQuickRuleTargets() {
     opt.value = profile.id;
     opt.textContent = usable
       ? `走 ${profile.name} (${protoLabel})`
-      : `⚠️ ${profile.name} (${protoLabel} · 不支持)`;
+      : `[需客户端] ${profile.name} (${protoLabel})`;
     if (!usable) opt.style.color = 'var(--danger)';
     quickRuleTargetSelect.appendChild(opt);
   });

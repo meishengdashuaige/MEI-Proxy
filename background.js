@@ -5,6 +5,8 @@
 
 import { loadConfig, saveConfig, DEFAULT_SETTINGS, generateId } from './lib/storage.js';
 import { buildPacScript, formatProfileToPacString } from './lib/pac_builder.js';
+import { fetchSubscription, parseSubscriptionContent } from './lib/subscription.js';
+import { simulateRuleMatch, isProfileDirectlyUsable, isGhelperSource, detectBrowserEnvironment } from './lib/utils.js';
 
 // 当前运行态配置缓存
 let currentConfig = null;
@@ -13,21 +15,7 @@ let currentConfig = null;
  * 检测是否处于 Firefox (Gecko) 内核环境
  */
 function isFirefoxEnvironment() {
-  if (typeof browser !== 'undefined' && browser.runtime && browser.runtime.getBrowserInfo) {
-    return true;
-  }
-  if (typeof navigator !== 'undefined' && navigator.userAgent && navigator.userAgent.includes('Firefox')) {
-    return true;
-  }
-  return false;
-}
-
-/**
- * 判断协议是否可被浏览器原生直接代理 (HTTP/HTTPS/SOCKS4/SOCKS5)
- */
-function isProtocolDirectlyUsable(proto) {
-  const p = (proto || '').toLowerCase();
-  return ['http', 'https', 'socks5', 'socks4', 'socks'].includes(p);
+  return detectBrowserEnvironment().isFirefox;
 }
 
 /**
@@ -40,22 +28,12 @@ function checkProfileDirectlyUsable(profile) {
     return { usable: true, reason: '' };
   }
 
-  if (typeof profile.directlyUsable === 'boolean') {
-    if (!profile.directlyUsable) {
-      const proto = (profile.protocol || '未知').toUpperCase();
-      return {
-        usable: false,
-        reason: `${proto} 协议节点无法被浏览器直接代理，请先在本地启动客户端，再用其提供的本地 SOCKS5/HTTP 端口新建节点`
-      };
-    }
-    return { usable: true, reason: '' };
-  }
-
-  const proto = (profile.protocol || profile.scheme || 'http').toLowerCase();
-  if (!isProtocolDirectlyUsable(proto)) {
+  const usable = isProfileDirectlyUsable(profile);
+  if (!usable) {
+    const proto = (profile.protocol || profile.scheme || '未知').toUpperCase();
     return {
       usable: false,
-      reason: `${proto.toUpperCase()} 协议节点无法被浏览器直接代理，请先在本地启动客户端，再用其提供的本地 SOCKS5/HTTP 端口新建节点`
+      reason: `${proto} 协议为复杂加密协议，浏览器原生仅支持 HTTP/HTTPS/SOCKS5，无法直接代理。请在本地启动客户端并在插件中添加其本地端口。`
     };
   }
   return { usable: true, reason: '' };
@@ -253,6 +231,18 @@ async function applyProxySettings(config) {
     }
   }
 
+  // Firefox 认证直连模式：配置中存在带认证的节点时，由 onRequest 全权接管代理决策
+  // （browser.proxy.onRequest 返回的 ProxyInfo 可携带 proxyAuthorizationHeader，
+  //   主动注入认证，解决 Ghelper 等"非挑战式认证"节点无法直连的问题）
+  if (isFirefox && (config.profiles || []).some(p =>
+    p.type === 'fixed' && p.auth && p.auth.enabled && p.auth.username
+  )) {
+    ensureFirefoxAuthProxy();
+    updateBadge(profile, config, {});
+    return;
+  }
+  removeFirefoxAuthProxy();
+
   // 提交到 Proxy API (支持 Chrome 和 Firefox)
   const proxyApi = (typeof browser !== 'undefined' && browser.proxy) || (typeof chrome !== 'undefined' && chrome.proxy);
 
@@ -444,63 +434,323 @@ if (chrome.webRequest && chrome.webRequest.onAuthRequired) {
 }
 
 /**
- * 消息通信监听器
+ * 同步单个订阅源：拉取 → 解析 → 替换该订阅下的旧节点 → 保存并生效
+ * @param {string} subId 订阅 ID
+ * @param {Object} [config] 配置（可传入避免重复加载）
+ * @returns {Promise<{success: boolean, nodes?: number, error?: string}>}
+ */
+async function syncSubscription(subId, config) {
+  if (!config) config = await loadConfig();
+  const sub = (config.subscriptions || []).find(s => s.id === subId);
+  if (!sub) return { success: false, error: '订阅不存在，请先在设置中添加' };
+
+  const isFirefox = isFirefoxEnvironment();
+  if (!isFirefox && (isGhelperSource(sub.url) || isGhelperSource(sub.name))) {
+    return {
+      success: false,
+      error: 'Chrome / Chromium 浏览器不支持 Ghelper 节点直连（由于 Chrome 无法主动发送代理认证头，而 Ghelper 服务器返回 403 阻断了 407 握手）。请在 Firefox 浏览器中使用或配合本地客户端。'
+    };
+  }
+
+  const { nodes, error } = await fetchSubscription(sub.url, subId, sub.defaultAuth, sub.name);
+  if (error || !nodes || nodes.length === 0) {
+    return { success: false, error: error || '订阅内容为空或格式无法识别' };
+  }
+
+  // 仅替换该订阅导入的固定节点（保留内置与手动添加的节点）
+  const kept = (config.profiles || []).filter(p => !(p.subId === subId && p.type === 'fixed'));
+  config.profiles = [...kept, ...nodes];
+  sub.lastSyncAt = new Date().toISOString();
+  await saveConfig(config);
+  await applyProxySettings(config);
+  return { success: true, nodes: nodes.length, name: sub.name };
+}
+
+/**
+ * 同步所有启用自动更新的订阅源
+ */
+async function syncAllSubscriptions(config) {
+  if (!config) config = await loadConfig();
+  const subs = (config.subscriptions || []).filter(s => s.autoUpdate !== false);
+  const results = [];
+  for (const sub of subs) {
+    results.push(await syncSubscription(sub.id, config));
+  }
+  return results;
+}
+
+/**
+ * ============================================================
+ * Firefox 认证直连模式 (browser.proxy.onRequest)
+ * ============================================================
+ * 背景：Ghelper 等机场节点对"无认证 CONNECT"返回 403 而非标准 407，
+ *       Chrome 扩展只能靠 407 触发 onAuthRequired，因此无法直连。
+ *       Firefox 的 ProxyInfo 支持 proxyAuthorizationHeader 字段：
+ *       浏览器会在 CONNECT 请求中主动携带 Proxy-Authorization，
+ *       专门用于"非挑战式认证"（non-challenging authentication）的代理。
+ *       因此 Firefox 系浏览器可以纯插件直连 Ghelper 认证节点。
+ */
+
+let firefoxAuthProxyActive = false;
+
+/**
+ * 根据 profile 构造 Firefox ProxyInfo（含认证头注入）
+ */
+function buildFirefoxProxyInfo(profile) {
+  if (!profile || profile.type === 'direct' || profile.id === 'direct') {
+    return { type: 'direct' };
+  }
+  if (profile.type === 'system') {
+    // onRequest 不支持 system，回退直连（保留 settings 路径的场景不受影响）
+    return { type: 'direct' };
+  }
+  if (profile.type !== 'fixed') {
+    return { type: 'direct' };
+  }
+  // 加密协议节点（VMess/VLESS/Trojan/SS 等）浏览器无法直接代理
+  if (profile.directlyUsable === false) {
+    return { type: 'direct' };
+  }
+
+  const scheme = (profile.scheme || profile.protocol || 'http').toLowerCase();
+  if (!['http', 'https', 'socks', 'socks4', 'socks5'].includes(scheme)) {
+    return { type: 'direct' };
+  }
+
+  const info = {
+    type: scheme.startsWith('socks') ? (scheme === 'socks4' ? 'socks4' : 'socks') : scheme,
+    host: (profile.host || '').trim(),
+    port: parseInt(profile.port, 10) || 8080
+  };
+  if (!info.host) return { type: 'direct' };
+
+  const auth = profile.auth || {};
+  if (info.type === 'socks' || info.type === 'socks4') {
+    // SOCKS 使用 ProxyInfo 的 username/password 字段
+    if (auth.enabled && auth.username) {
+      info.username = auth.username;
+      info.password = auth.password || '';
+    }
+  } else if (auth.enabled && auth.username) {
+    // HTTP/HTTPS 代理：通过 proxyAuthorizationHeader 主动携带认证 (标准 HTTP Basic Auth 格式)
+    const cred = auth.username + ':' + (auth.password || '');
+    const b64 = (typeof btoa === 'function')
+      ? btoa(unescape(encodeURIComponent(cred)))
+      : Buffer.from(cred, 'utf8').toString('base64');
+    info.proxyAuthorizationHeader = `Basic ${b64}`;
+  }
+  return info;
+}
+
+/**
+ * Firefox onRequest 监听器：为每个请求决定代理并注入认证
+ */
+async function handleFirefoxProxyRequest(requestInfo) {
+  const reqUrl = requestInfo.url || '';
+
+  // 0. 测速与连通性探测请求强制 DIRECT 直连（不走代理）
+  if (
+    reqUrl.includes('__direct_test=1') ||
+    reqUrl.includes('connectivitycheck.gstatic.com') ||
+    reqUrl.includes('cp.cloudflare.com') ||
+    reqUrl.includes('1.1.1.1/cdn-cgi/trace')
+  ) {
+    return { type: 'direct' };
+  }
+
+  const config = currentConfig || await loadConfig();
+  const activeId = config.activeProfileId || 'auto_switch';
+  const activeProfile = config.profiles.find(p => p.id === activeId) || config.profiles[0];
+  if (!activeProfile) return { type: 'direct' };
+
+  if (activeProfile.type === 'auto_switch') {
+    const match = simulateRuleMatch(
+      reqUrl,
+      config.rules || [],
+      config.bypassList || [],
+      activeProfile.defaultProfileId || 'direct'
+    );
+    const target = config.profiles.find(p => p.id === match.targetProfileId);
+    return buildFirefoxProxyInfo(target);
+  }
+  return buildFirefoxProxyInfo(activeProfile);
+}
+
+/**
+ * 注册 Firefox onRequest 认证直连监听器
+ */
+function ensureFirefoxAuthProxy() {
+  if (firefoxAuthProxyActive) return;
+  if (typeof browser === 'undefined' || !browser.proxy || !browser.proxy.onRequest) return;
+  try {
+    browser.proxy.onRequest.addListener(handleFirefoxProxyRequest, { urls: ['<all_urls>'] });
+    if (browser.proxy.onError) {
+      browser.proxy.onError.addListener((err) => {
+        console.error('[MEIProxy] proxy.onError:', err);
+      });
+    }
+    firefoxAuthProxyActive = true;
+    console.log('[MEIProxy] Firefox 认证直连模式已启用 (onRequest + proxyAuthorizationHeader)');
+  } catch (err) {
+    console.error('[MEIProxy] 注册 Firefox onRequest 失败:', err);
+  }
+}
+
+/**
+ * 注销 Firefox onRequest 认证直连监听器
+ */
+function removeFirefoxAuthProxy() {
+  if (!firefoxAuthProxyActive) return;
+  try {
+    browser.proxy.onRequest.removeListener(handleFirefoxProxyRequest);
+  } catch (e) {
+    // 忽略
+  }
+  firefoxAuthProxyActive = false;
+}
+
+/**
+ * 消息通信监听器 (同时完美兼容 Firefox Promise 与 Chromium sendResponse)
  */
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  const { action, payload } = message;
+  const { action, payload } = message || {};
 
-  if (action === 'GET_CONFIG') {
-    loadConfig().then(config => {
-      currentConfig = config;
-      sendResponse({ success: true, config });
-    });
-    return true;
-  }
+  const handleAsync = async () => {
+    try {
+      if (action === 'GET_CONFIG') {
+        const config = await loadConfig();
+        currentConfig = config;
+        return { success: true, config };
+      }
 
-  if (action === 'SET_ACTIVE_PROFILE') {
-    loadConfig().then(async (config) => {
-      config.activeProfileId = payload.profileId;
-      await saveConfig(config);
-      await applyProxySettings(config);
-      sendResponse({ success: true, config });
-    });
-    return true;
-  }
+      if (action === 'SET_ACTIVE_PROFILE') {
+        const config = await loadConfig();
+        config.activeProfileId = payload.profileId;
+        await saveConfig(config);
+        await applyProxySettings(config);
+        return { success: true, config };
+      }
 
-  if (action === 'SAVE_FULL_CONFIG') {
-    saveConfig(payload.config).then(async () => {
-      await applyProxySettings(payload.config);
-      sendResponse({ success: true });
-    });
-    return true;
-  }
+      if (action === 'SAVE_FULL_CONFIG') {
+        await saveConfig(payload.config);
+        await applyProxySettings(payload.config);
+        return { success: true };
+      }
 
-  if (action === 'ADD_RULE') {
-    loadConfig().then(async (config) => {
-      const newRule = {
-        id: generateId('rule'),
-        enabled: true,
-        type: payload.type || 'wildcard',
-        pattern: payload.pattern,
-        targetProfileId: payload.targetProfileId,
-        comment: payload.comment || `来自快捷添加 (${new Date().toLocaleDateString()})`
-      };
-      config.rules = [newRule, ...(config.rules || [])];
-      await saveConfig(config);
-      await applyProxySettings(config);
-      sendResponse({ success: true, rule: newRule, config });
-    });
-    return true;
-  }
+      if (action === 'ADD_RULE') {
+        const config = await loadConfig();
+        const newRule = {
+          id: generateId('rule'),
+          enabled: true,
+          type: payload.type || 'wildcard',
+          pattern: payload.pattern,
+          targetProfileId: payload.targetProfileId,
+          comment: payload.comment || `来自快捷添加 (${new Date().toLocaleDateString()})`
+        };
+        config.rules = [newRule, ...(config.rules || [])];
+        await saveConfig(config);
+        await applyProxySettings(config);
+        return { success: true, rule: newRule, config };
+      }
 
-  if (action === 'RELOAD_PROXY') {
-    loadConfig().then(async (config) => {
-      await applyProxySettings(config);
-      sendResponse({ success: true });
-    });
-    return true;
-  }
+      if (action === 'RELOAD_PROXY') {
+        const config = await loadConfig();
+        await applyProxySettings(config);
+        return { success: true };
+      }
+
+      if (action === 'SYNC_SUBSCRIPTION') {
+        return await syncSubscription(payload?.subId);
+      }
+
+      if (action === 'SYNC_ALL_SUBSCRIPTIONS') {
+        const results = await syncAllSubscriptions();
+        return { success: true, results };
+      }
+
+      if (action === 'SAVE_SUBSCRIPTIONS') {
+        const config = await loadConfig();
+        config.subscriptions = payload?.subscriptions || [];
+        await saveConfig(config);
+        return { success: true };
+      }
+
+      if (action === 'IMPORT_SUBSCRIPTION_CONTENT') {
+        const config = await loadConfig();
+        const { name, content } = payload || {};
+        const subName = name || '粘贴导入';
+
+        const isFirefox = isFirefoxEnvironment();
+        if (!isFirefox && (isGhelperSource(content) || isGhelperSource(name))) {
+          return {
+            success: false,
+            error: 'Chrome / Chromium 浏览器不支持 Ghelper 节点直连（由于 Chrome 无法主动发送代理认证头，而 Ghelper 服务器返回 403 阻断了 407 握手）。请在 Firefox 浏览器中使用或配合本地客户端。'
+          };
+        }
+
+        const subId = payload?.subId || 'sub_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+        const nodes = parseSubscriptionContent(content || '', subId, payload?.defaultAuth || null, subName);
+        if (!nodes || nodes.length === 0) {
+          return { success: false, error: '内容无法识别为代理节点，支持 Clash YAML、Base64 订阅与纯链接列表' };
+        }
+        // 同 subId 覆盖，否则追加
+        const kept = (config.profiles || []).filter(p => !(p.subId === subId && p.type === 'fixed'));
+        config.profiles = [...kept, ...nodes];
+        // 记录为粘贴导入型订阅（不自动更新，URL 为空）
+        config.subscriptions = config.subscriptions || [];
+        if (!config.subscriptions.some(s => s.id === subId)) {
+          config.subscriptions.push({
+            id: subId,
+            name: subName,
+            url: '',
+            defaultAuth: payload?.defaultAuth || { enabled: false, username: '', password: '' },
+            autoUpdate: false,
+            lastSyncAt: new Date().toISOString()
+          });
+        }
+        await saveConfig(config);
+        await applyProxySettings(config);
+        return { success: true, nodes: nodes.length, subId };
+      }
+
+      return { success: false, error: `未知的操作指令: ${action}` };
+    } catch (err) {
+      console.error('[MEIProxy] onMessage error:', err);
+      return { success: false, error: err.message || '后台处理异常' };
+    }
+  };
+
+  handleAsync().then(res => {
+    try {
+      sendResponse(res);
+    } catch (e) {
+      // 忽略
+    }
+  });
+
+  return true;
 });
+
+/**
+ * 订阅自动更新定时器（每 12 小时）
+ */
+const SUBSCRIPTION_ALARM_NAME = 'meiproxy_sub_sync';
+
+function scheduleSubscriptionAlarm() {
+  if (!chrome.alarms) return;
+  chrome.alarms.create(SUBSCRIPTION_ALARM_NAME, { periodInMinutes: 12 * 60 });
+}
+
+if (chrome.alarms && chrome.alarms.onAlarm) {
+  chrome.alarms.onAlarm.addListener((alarm) => {
+    if (alarm.name !== SUBSCRIPTION_ALARM_NAME) return;
+    console.log('[MEIProxy] 定时同步节点订阅...');
+    syncAllSubscriptions().then(results => {
+      const ok = results.filter(r => r.success).length;
+      console.log(`[MEIProxy] 订阅同步完成: ${ok}/${results.length} 成功`);
+    }).catch(err => console.error('[MEIProxy] 订阅同步失败:', err));
+  });
+}
 
 /**
  * 扩展安装或更新初始化
@@ -509,6 +759,7 @@ chrome.runtime.onInstalled.addListener(async (details) => {
   console.log('[MEIProxy] Extension installed / updated:', details.reason);
   const config = await loadConfig();
   await applyProxySettings(config);
+  scheduleSubscriptionAlarm();
 });
 
 /**
@@ -518,6 +769,7 @@ chrome.runtime.onStartup.addListener(async () => {
   console.log('[MEIProxy] Browser startup');
   const config = await loadConfig();
   await applyProxySettings(config);
+  scheduleSubscriptionAlarm();
 });
 
 // 监听 storage 变更以保持多窗口同步

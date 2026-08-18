@@ -103,50 +103,50 @@
       <div class="features-grid">
         <div class="feature-card">
           <div class="feature-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg>
           </div>
-          <h3>多协议代理管理</h3>
-          <p>支持 HTTP、HTTPS、SOCKS4、SOCKS5 代理协议，可自由添加本地客户端端口（如 Clash 7890）或远程服务器节点。</p>
+          <h3>节点订阅与多源自动分组</h3>
+          <p>支持导入 Clash YAML、Base64 订阅或直链，自动按订阅源隔离分组管理，支持定时自动静默同步与一键批量更新。</p>
         </div>
 
         <div class="feature-card">
           <div class="feature-icon">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg>
           </div>
-          <h3>按规则自动分流</h3>
-          <p>支持通配符（如 *.google.com）、关键词与正则表达式。按列表顺序匹配，命中规则自动走对应节点，未匹配走默认动作。</p>
+          <h3>按规则自动分流与沙盒</h3>
+          <p>支持通配符、关键词与正则表达式路由。内置分流沙盒模拟器，实时测试命中流向，未匹配自动走默认回退动作。</p>
         </div>
 
         <div class="feature-card">
           <div class="feature-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
           </div>
-          <h3>数据本地存储</h3>
-          <p>所有节点信息、分流规则均保存在浏览器的 local storage 中，不向任何外部服务器上传数据，保证安全。</p>
+          <h3>纯直连高速测速与分组选优</h3>
+          <p>测速流量强制直连（绝不走自身代理造成回环），一键并发测速并支持优先在当前所选分组内部自动挑选最低延迟节点。</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg>
+          </div>
+          <h3>协议智能识别与环境适配</h3>
+          <p>智能识别 HTTP/HTTPS/SOCKS5 原生直连与 VMess/VLESS 等隧道协议；针对 Firefox 完整支持 Ghelper 专线节点认证直连。</p>
         </div>
 
         <div class="feature-card">
           <div class="feature-icon">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
           </div>
-          <h3>常用规则集一键导入</h3>
-          <p>内置开发平台（GitHub/Docker）、AI 工具（OpenAI/Claude）等常用网站分流规则，点击即可直接导入使用。</p>
+          <h3>精品规则集一键导入</h3>
+          <p>内置开发平台（GitHub/Docker）、AI 工具（OpenAI/Claude/DeepSeek）、全球流媒体与国内白名单等规则模板。</p>
         </div>
 
         <div class="feature-card">
           <div class="feature-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
           </div>
-          <h3>节点测速与选优</h3>
-          <p>支持单个或并发测试节点连通性与延时，并能根据测速结果快速切换至响应较快的节点。</p>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-          </div>
-          <h3>配置备份与还原</h3>
-          <p>支持一键导出包含全部节点与分流规则的 JSON 备份文件，方便在多台电脑或不同浏览器之间快速迁移同步。</p>
+          <h3>100% 本地安全存储与备份</h3>
+          <p>所有节点、订阅和规则均保存在本地 storage 中，零第三方网络上报，支持 JSON 全量一键导入/导出跨设备无缝迁移。</p>
         </div>
       </div>
     </div>

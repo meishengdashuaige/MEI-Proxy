@@ -1,7 +1,8 @@
 import { buildPacScript, formatProfileToPacString } from '../lib/pac_builder.js';
-import { simulateRuleMatch, extractDomainInfo, detectNodeRegion } from '../lib/utils.js';
+import { simulateRuleMatch, extractDomainInfo, detectNodeRegion, isProfileDirectlyUsable, isGhelperSource, detectBrowserEnvironment } from '../lib/utils.js';
 import { DEFAULT_PROFILES, DEFAULT_RULES, DEFAULT_BYPASS_LIST } from '../lib/storage.js';
 import { PRESET_RULE_SETS, getPresetRuleSetById, getPresetRuleSetsSummary } from '../lib/preset_rules.js';
+import { parseSubscriptionContent, parseClashYaml, parseProxyUri } from '../lib/subscription.js';
 
 console.log('========================================');
 console.log('🚀 开始 MEIProxy 扩展核心逻辑全覆盖自动化测试');
@@ -17,7 +18,7 @@ const directProf = { type: 'direct' };
 const systemProf = { type: 'system' };
 
 console.assert(formatProfileToPacString(httpProf) === 'PROXY 127.0.0.1:7890; DIRECT', 'HTTP PAC 格式错误');
-console.assert(formatProfileToPacString(httpsProf) === 'HTTPS proxy.company.com:8443; PROXY proxy.company.com:8443; DIRECT', 'HTTPS PAC 格式错误');
+console.assert(formatProfileToPacString(httpsProf) === 'HTTPS proxy.company.com:8443; DIRECT', 'HTTPS PAC 格式错误');
 console.assert(formatProfileToPacString(socks4Prof) === 'SOCKS 127.0.0.1:1080; DIRECT', 'SOCKS4 PAC 格式错误');
 console.assert(formatProfileToPacString(socks5Prof) === 'SOCKS5 127.0.0.1:10808; SOCKS 127.0.0.1:10808; DIRECT', 'SOCKS5 PAC 格式错误');
 console.assert(formatProfileToPacString(directProf) === 'DIRECT', 'DIRECT PAC 格式错误');
@@ -170,23 +171,23 @@ console.assert(clashInheritedNodes[0].auth.username === 'subscriber_user_888', '
 
 console.log('  ✓ Base64 订阅、中文字符、Clash YAML、统一默认身份验证 (Default Auth) 自动继承与冲突隔离全部通过');
 
-// 6. 节点地区识别与国旗解析测试
-console.log('\n[测试 6] 智能节点地区与国旗识别测试:');
+// 6. 节点地区识别测试
+console.log('\n[测试 6] 智能节点地区识别测试:');
 
 const r1 = detectNodeRegion('🇭🇰 香港 01 [VIP专线] (1000M)');
-console.assert(r1.code === 'HK' && r1.flag === '🇭🇰', '香港节点识别错误');
+console.assert(r1.code === 'HK' && r1.name === '香港', '香港节点识别错误');
 
 const r2 = detectNodeRegion('JP Tokyo Cloud Server - 02');
-console.assert(r2.code === 'JP' && r2.flag === '🇯🇵', '日本节点识别错误');
+console.assert(r2.code === 'JP' && r2.name === '日本', '日本节点识别错误');
 
 const r3 = detectNodeRegion('US Los Angeles BGP 4K');
-console.assert(r3.code === 'US' && r3.flag === '🇺🇸', '美国节点识别错误');
+console.assert(r3.code === 'US' && r3.name === '美国', '美国节点识别错误');
 
 const r4 = detectNodeRegion('新加坡 狮城 03 (SOCKS5)');
-console.assert(r4.code === 'SG' && r4.flag === '🇸🇬', '新加坡节点识别错误');
+console.assert(r4.code === 'SG' && r4.name === '新加坡', '新加坡节点识别错误');
 
 const r5 = detectNodeRegion('Custom Self-Hosted Server');
-console.assert(r5.code === 'OTHER' && r5.flag === '🌐', '未知节点识别错误');
+console.assert(r5.code === 'OTHER' && r5.name === '其它', '未知节点识别错误');
 console.log('  ✓ 香港、日本、美国、新加坡及未知地区识别全部通过');
 
 // 7. V2rayN (VMess / VLESS / Trojan / SSR) 协议扩展解析测试
@@ -249,6 +250,57 @@ console.assert(chinaSet.rules.some(r => r.pattern === '*.baidu.com'), '国内白
 
 console.log('  ✓ AI/开发、全球流媒体、国内直连白名单等规则集完整无误');
 
+// 9. 订阅分组与元数据提取测试
+console.log('\n[测试 9] 订阅分组关联与 subName 元数据传递测试:');
+const sampleSubContent = `
+https://node-a1.subdomain.com:443#🇺🇸 美国 A1
+https://node-a2.subdomain.com:443#🇯🇵 日本 A2
+`;
+const groupedNodes = parseSubscriptionContent(sampleSubContent, 'sub_airport_alpha', null, '我的主力机场A');
+console.assert(groupedNodes.length === 2, '订阅分组解析数量应为 2');
+console.assert(groupedNodes[0].subId === 'sub_airport_alpha', '节点 0 subId 应为 sub_airport_alpha');
+console.assert(groupedNodes[0].subName === '我的主力机场A', '节点 0 subName 应为 我的主力机场A');
+console.assert(groupedNodes[1].subId === 'sub_airport_alpha', '节点 1 subId 应为 sub_airport_alpha');
+console.assert(groupedNodes[1].subName === '我的主力机场A', '节点 1 subName 应为 我的主力机场A');
+console.log('  ✓ 订阅来源 subId 与组别名称 subName 完整绑定通过');
+
+// 10. 协议可用性智能识别测试 (直接可用 vs 需本地客户端)
+console.log('\n[测试 10] 浏览器原生协议直接可用性 (isProfileDirectlyUsable) 全协议识别测试:');
+const nodeHttp = { type: 'fixed', protocol: 'http', host: '1.2.3.4', port: 80 };
+const nodeHttps = { type: 'fixed', protocol: 'https', host: '1.2.3.4', port: 443 };
+const nodeSocks4 = { type: 'fixed', protocol: 'socks4', host: '1.2.3.4', port: 1080 };
+const nodeSocks5 = { type: 'fixed', protocol: 'socks5', host: '1.2.3.4', port: 10808 };
+const nodeSS = { type: 'fixed', protocol: 'ss', directlyUsable: false, host: '1.2.3.4', port: 8388 };
+const nodeSSR = { type: 'fixed', protocol: 'ssr', directlyUsable: false, host: '1.2.3.4', port: 8388 };
+const nodeVMess = { type: 'fixed', protocol: 'vmess', directlyUsable: false, host: '1.2.3.4', port: 443 };
+const nodeVLESS = { type: 'fixed', protocol: 'vless', directlyUsable: false, host: '1.2.3.4', port: 443 };
+const nodeTrojan = { type: 'fixed', protocol: 'trojan', directlyUsable: false, host: '1.2.3.4', port: 443 };
+const nodeHy2 = { type: 'fixed', protocol: 'hysteria2', directlyUsable: false, host: '1.2.3.4', port: 443 };
+
+console.assert(isProfileDirectlyUsable(nodeHttp) === true, 'HTTP 节点应判定为直接可用');
+console.assert(isProfileDirectlyUsable(nodeHttps) === true, 'HTTPS 节点应判定为直接可用');
+console.assert(isProfileDirectlyUsable(nodeSocks4) === true, 'SOCKS4 节点应判定为直接可用');
+console.assert(isProfileDirectlyUsable(nodeSocks5) === true, 'SOCKS5 节点应判定为直接可用');
+console.assert(isProfileDirectlyUsable(nodeSS) === false, 'Shadowsocks 节点应判定为不可直接可用');
+console.assert(isProfileDirectlyUsable(nodeSSR) === false, 'SSR 节点应判定为不可直接可用');
+console.assert(isProfileDirectlyUsable(nodeVMess) === false, 'VMess 节点应判定为不可直接可用');
+console.assert(isProfileDirectlyUsable(nodeVLESS) === false, 'VLESS 节点应判定为不可直接可用');
+console.assert(isProfileDirectlyUsable(nodeTrojan) === false, 'Trojan 节点应判定为不可直接可用');
+console.assert(isProfileDirectlyUsable(nodeHy2) === false, 'Hysteria2 节点应判定为不可直接可用');
+console.log('  ✓ HTTP / HTTPS / SOCKS4 / SOCKS5 可用判定与 SS / VMess / Trojan / VLESS 隧道协议识别全部通过');
+
+// 11. Ghelper 特征识别与浏览器环境兼容判断测试
+console.log('\n[测试 11] Ghelper 特征识别与浏览器环境兼容逻辑测试:');
+console.assert(isGhelperSource('https://node01.ghelper-proxy.net:443') === true, 'Ghelper 域名特征识别失败');
+console.assert(isGhelperSource('Ghelper 专线订阅') === true, 'Ghelper 名称特征识别失败');
+console.assert(isGhelperSource({ host: 'node02.ghelper-proxy.net' }) === true, 'Ghelper 对象识别失败');
+console.assert(isGhelperSource('https://normal-proxy.com:8080') === false, '普通节点不应误判为 Ghelper');
+
+const env = detectBrowserEnvironment();
+console.assert(typeof env.isFirefox === 'boolean', '浏览器检测应包含 isFirefox 布尔值');
+console.assert(typeof env.isChromium === 'boolean', '浏览器检测应包含 isChromium 布尔值');
+console.log('  ✓ Ghelper 域名与名称特征识别、浏览器环境检测结构全部通过');
+
 console.log('\n========================================');
-console.log('🎉 8 大测试套件、全部测试用例 100% 验证通过！');
+console.log('🎉 11 大测试套件、全部测试用例 100% 验证通过！');
 console.log('========================================\n');

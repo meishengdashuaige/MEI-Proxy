@@ -29,6 +29,15 @@
           <span>代理节点管理</span>
         </button>
 
+        <button class="nav-item" data-tab="tab-subscriptions">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 11a9 9 0 0 1 9 9"></path>
+            <path d="M4 4a16 16 0 0 1 16 16"></path>
+            <circle cx="5" cy="19" r="1"></circle>
+          </svg>
+          <span>节点订阅管理</span>
+        </button>
+
         <button class="nav-item" data-tab="tab-rules">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="16 3 21 3 21 8"></polyline>
@@ -91,6 +100,18 @@
             <p class="page-desc">配置与管理 HTTP / HTTPS / SOCKS4 / SOCKS5 代理服务器节点（浏览器原生直连）</p>
           </div>
           <div class="header-btn-group">
+            <button id="btnBatchSpeedTest" class="btn btn-secondary" title="并发测试当前筛选或所有可用直连代理节点的网络延时">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+              一键测速
+            </button>
+            <button id="btnGoToSubscriptions" class="btn btn-secondary" title="前往订阅管理页面导入和同步订阅源">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 11a9 9 0 0 1 9 9"></path>
+                <path d="M4 4a16 16 0 0 1 16 16"></path>
+                <circle cx="5" cy="19" r="1"></circle>
+              </svg>
+              订阅管理
+            </button>
             <button id="btnCleanDeadNodes" class="btn btn-secondary" title="自动测试并一键移除不可达或超时的节点">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
               清理失效节点
@@ -104,62 +125,70 @@
 
         <!-- Node Management Filter Toolbar -->
         <div class="card toolbar-card">
-          <div class="filter-toolbar-row">
-            <div class="search-box" style="flex: 1; min-width: 220px;">
+          <div class="toolbar-left">
+            <div class="search-box">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               </svg>
-              <input type="text" id="profileSearchInput" placeholder="搜索节点名 / IP / 端口 / 地区...">
+              <input type="text" id="profileSearchInput" placeholder="搜索节点名 / IP / 端口 / 订阅分组...">
             </div>
-
-            <div class="toolbar-controls">
-              <!-- Protocol Filter -->
-              <select id="filterProfileProtocol" class="select-input select-sm">
-                <option value="ALL">全部协议</option>
-                <option value="socks5">SOCKS5</option>
-                <option value="http">HTTP</option>
-                <option value="https">HTTPS</option>
-                <option value="socks4">SOCKS4</option>
-              </select>
-
-              <!-- Sort Option -->
-              <select id="sortProfileOption" class="select-input select-sm">
-                <option value="DEFAULT">默认排序</option>
-                <option value="LATENCY_ASC">延时由低到高 (最快优先)</option>
-                <option value="NAME_ASC">节点名称 A-Z</option>
-                <option value="FAV_FIRST">常用收藏置顶</option>
-              </select>
-
-              <!-- View Mode Switcher -->
-              <div class="view-mode-toggle">
-                <button class="view-mode-btn active" id="btnViewGrid" title="卡片网格视图">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                </button>
-                <button class="view-mode-btn" id="btnViewList" title="紧凑列表视图">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
-                </button>
-              </div>
+            <select id="filterProfileGroup" class="select-input select-sm" title="按所属订阅分组筛选">
+              <option value="ALL">全部分组</option>
+              <option value="CUSTOM">默认与手动添加</option>
+            </select>
+            <select id="filterProfileStatus" class="select-input select-sm" title="按节点可用状态筛选">
+              <option value="ALL">全部状态</option>
+              <option value="USABLE">浏览器直连</option>
+              <option value="UNUSABLE">需本地客户端</option>
+            </select>
+            <select id="filterProfileProtocol" class="select-input select-sm">
+              <option value="ALL">全部协议</option>
+              <option value="HTTP">HTTP</option>
+              <option value="HTTPS">HTTPS</option>
+              <option value="SOCKS5">SOCKS5</option>
+              <option value="SOCKS4">SOCKS4</option>
+              <option value="VMESS">VMess</option>
+              <option value="VLESS">VLESS</option>
+              <option value="TROJAN">Trojan</option>
+              <option value="SS">Shadowsocks</option>
+            </select>
+            <select id="sortProfileOption" class="select-input select-sm">
+              <option value="DEFAULT">默认排序</option>
+              <option value="FAV_FIRST">常用收藏置顶</option>
+              <option value="LATENCY_ASC">延时由低到高</option>
+              <option value="NAME_ASC">按节点名称 A-Z</option>
+            </select>
+          </div>
+          <div class="toolbar-right">
+            <div class="view-mode-toggle">
+              <button id="btnViewGrid" class="view-btn active" title="网格卡片视图">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+              </button>
+              <button id="btnViewList" class="view-btn" title="紧凑列表视图">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+              </button>
             </div>
           </div>
         </div>
 
-        <!-- Profiles Container (Cards Grid / List Table) -->
-        <div class="profile-cards-grid" id="profilesGrid">
-          <!-- Profiles Cards injected by JS -->
+        <!-- Profiles Card Grid Mode -->
+        <div id="profilesGrid" class="profiles-grid">
+          <!-- Profiles injected by JS -->
         </div>
 
-        <div class="card table-card hidden" id="profilesListCard">
-          <div class="table-responsive">
+        <!-- Profiles Table List Mode -->
+        <div id="profilesListCard" class="card table-card hidden" style="margin-top: 10px;">
+          <div class="table-container">
             <table class="data-table">
               <thead>
                 <tr>
                   <th width="40">收藏</th>
-                  <th>节点名称</th>
-
-                  <th width="90">协议</th>
-                  <th>服务器与端口</th>
-                  <th width="110">网络延时</th>
+                  <th width="200">节点名称</th>
+                  <th width="120">所属分组</th>
+                  <th width="90">协议类型</th>
+                  <th width="180">服务器地址</th>
+                  <th width="90">延迟</th>
                   <th width="140" class="text-right">操作</th>
                 </tr>
               </thead>
@@ -171,7 +200,80 @@
         </div>
       </section>
 
-      <!-- TAB 3: 智能分流规则 -->
+      <!-- TAB: 节点订阅管理 (独立工作区) -->
+      <section id="tab-subscriptions" class="tab-pane">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">节点订阅管理</h1>
+            <p class="page-desc">导入机场 / 自建服务器订阅链接（Base64、纯链接或 Clash YAML 配置），一键自动分组并保持定时同步</p>
+          </div>
+          <div class="header-btn-group">
+            <button id="btnSyncAllSubscriptions" class="btn btn-secondary">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2v6h-6"></path><path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path><path d="M3 22v-6h6"></path><path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path></svg>
+              同步全部订阅
+            </button>
+            <button id="btnTogglePasteImport" class="btn btn-secondary btn-toggle-import" title="粘贴 Clash YAML / Base64 / 链接列表，直接解析导入">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              粘贴导入
+            </button>
+          </div>
+        </div>
+
+        <!-- Browser Compatibility Indicator Alert -->
+        <div id="browserCompatBanner" class="browser-compat-banner">
+          <!-- Injected by JS -->
+        </div>
+
+        <!-- Subscription Add Card -->
+        <div class="card" style="margin-bottom: 20px;">
+          <div style="font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              <span>添加新订阅源</span>
+            </div>
+            <button id="btnTogglePasteImport" class="btn btn-secondary btn-sm btn-toggle-import" title="粘贴 Clash YAML / Base64 / 链接列表，直接解析导入">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              <span>展开/折叠粘贴导入</span>
+            </button>
+          </div>
+          <div class="subscription-add-row">
+            <input type="text" id="subNameInput" class="input-text" placeholder="订阅名称（如：主力机场）" style="flex: 0 0 160px;">
+            <input type="text" id="subUrlInput" class="input-text" placeholder="订阅链接 https://example.com/api/v1/client/subscribe?token=..." style="flex: 1 1 260px;">
+            <input type="text" id="subUserInput" class="input-text" placeholder="默认账号 (可选)" style="flex: 0 0 120px;">
+            <input type="password" id="subPassInput" class="input-text" placeholder="默认密码 (可选)" style="flex: 0 0 120px;">
+            <label class="subscription-auto-label" title="订阅节点变更后每 12 小时自动同步">
+              <input type="checkbox" id="subAutoUpdate" checked>
+              <span>自动更新</span>
+            </label>
+            <button id="btnAddSubscription" class="btn btn-primary">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              <span>添加订阅</span>
+            </button>
+          </div>
+
+          <div id="pasteImportBox" class="paste-import-box hidden" style="margin-top: 16px;">
+            <div style="font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px;">粘贴 Clash YAML / Base64 / 节点链接:</div>
+            <textarea id="pasteImportTextarea" class="input-textarea" rows="6" placeholder="支持粘贴 Clash YAML 节点定义、Base64 编码文本或单行链接列表（如 http://user:pass@host:port#节点名）"></textarea>
+            <div class="paste-import-actions">
+              <input type="text" id="pasteImportNameInput" class="input-text" placeholder="分组名称（默认：粘贴导入）" style="flex: 1 1 200px;">
+              <button id="btnImportPasteContent" class="btn btn-primary">解析并导入节点</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Existing Subscriptions List Section -->
+        <div class="card">
+          <div style="font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg>
+              <span>已添加的订阅源列表</span>
+            </div>
+          </div>
+          <div id="subscriptionList" class="subscription-list">
+            <!-- Subscription items injected by JS -->
+          </div>
+        </div>
+      </section>
       <section id="tab-rules" class="tab-pane">
         <div class="page-header">
           <div>
