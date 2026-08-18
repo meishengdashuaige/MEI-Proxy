@@ -617,10 +617,13 @@ async function refreshNetworkStatus() {
  */
 function openOptionsPage(e) {
   if (e) e.preventDefault();
-  if (chrome.runtime.openOptionsPage) {
+  const url = (typeof chrome !== 'undefined' && chrome.runtime?.getURL ? chrome.runtime.getURL('options/options.html') : 'options/options.html');
+  if (typeof chrome !== 'undefined' && chrome.tabs && chrome.tabs.create) {
+    chrome.tabs.create({ url });
+  } else if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.openOptionsPage) {
     chrome.runtime.openOptionsPage();
   } else {
-    window.open(chrome.runtime.getURL('options/options.html'));
+    window.open(url);
   }
 }
 

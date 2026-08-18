@@ -47,28 +47,46 @@ function read(rel) {
 /**
  * 简易合并器：删除 import 行 + 去掉 export 关键字
  */
+function cleanCode(code) {
+  return code
+    // 1. 删除多行与单行 import ... from '...'
+    .replace(/import\s+[\s\S]*?from\s+['"][^'"]+['"];?/g, '')
+    // 2. 删除纯副作用 import '...'
+    .replace(/import\s+['"][^'"]+['"];?/g, '')
+    // 3. 去掉 export 关键字
+    .replace(/^export\s+async\s+function\s+/gm, 'async function ')
+    .replace(/^export\s+function\s+/gm, 'function ')
+    .replace(/^export\s+const\s+/gm, 'const ')
+    .replace(/^export\s+let\s+/gm, 'let ')
+    .replace(/^export\s+var\s+/gm, 'var ')
+    .replace(/^export\s*\{[\s\S]*?\};?\s*$/gm, '')
+    .replace(/^export\s+default\s+/gm, '');
+}
+
+/**
+ * 简易合并器：合并全部依赖库 + 清洗 import/export + 包装安全 IIFE
+ */
 function simpleBundle(entryRel) {
   const parts = [];
   for (const lib of LIB_ORDER) {
-    let code = read(lib);
-    // 去掉 export 前缀
-    code = code
-      .replace(/^export\s+async\s+function\s+/gm, 'async function ')
-      .replace(/^export\s+function\s+/gm, 'function ')
-      .replace(/^export\s+const\s+/gm, 'const ')
-      .replace(/^export\s+let\s+/gm, 'let ')
-      .replace(/^export\s+var\s+/gm, 'var ')
-      .replace(/^export\s*\{[^}]*\};?\s*$/gm, '')
-      .replace(/^export\s+default\s+/gm, '');
-    parts.push(`/* ===== ${lib} ===== */\n${code}`);
+    parts.push(`/* ===== ${lib} ===== */\n${cleanCode(read(lib))}`);
   }
 
-  let entry = read(entryRel);
-  // 删除所有 import 语句行
-  entry = entry.replace(/^import\s[^;]*;?\s*$/gm, '');
-  parts.push(`/* ===== ${entryRel} ===== */\n${entry}`);
+  parts.push(`/* ===== ${entryRel} ===== */\n${cleanCode(read(entryRel))}`);
 
-  return parts.join('\n\n');
+  // 包装为独立作用域 IIFE
+  const bundled = `(function () {\n'use strict';\n\n${parts.join('\n\n')}\n})();`;
+
+  // 立即在 Node VM 中校验语法完整性
+  try {
+    const vm = require('node:vm');
+    new vm.Script(bundled);
+  } catch (err) {
+    console.error(`❌ [bundle error] 语法校验失败 (${entryRel}):`, err.message);
+    throw err;
+  }
+
+  return bundled;
 }
 
 function bundleWithEsbuild(entryRel) {
@@ -104,7 +122,7 @@ for (const entry of ENTRIES) {
   const outFile = path.resolve(outDir, relOut);
   fs.mkdirSync(path.dirname(outFile), { recursive: true });
   fs.writeFileSync(outFile, code, 'utf8');
-  console.log(`[bundle] ✓ ${relOut} (${(code.length / 1024).toFixed(1)} KB)`);
+  console.log(`[bundle] ✓ ${relOut} (${(code.length / 1024).toFixed(1)} KB) - 语法校验通过`);
 }
 
 console.log(`[bundle] 完成，输出目录: ${outDir}`);

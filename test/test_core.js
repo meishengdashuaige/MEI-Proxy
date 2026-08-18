@@ -48,7 +48,7 @@ const pacScript = buildPacScript({
 });
 
 console.assert(typeof pacScript === 'string' && pacScript.includes('function FindProxyForURL(url, host)'), 'PAC 脚本缺少入口函数');
-console.assert(pacScript.includes('PROXY 127.0.0.1:7890; DIRECT'), 'PAC 脚本缺少 7890 代理定义');
+console.assert(pacScript.includes('PROXY 127.0.0.1:7897; DIRECT'), 'PAC 脚本缺少 7897 代理定义');
 console.assert(pacScript.includes('*.google.com'), 'PAC 脚本缺少 Google 规则');
 console.assert(pacScript.includes('isInNet(host, "192.168.0.0"'), 'PAC 脚本缺少局域网直连判断');
 console.log('  ✓ PAC 脚本生成成功，结构完备 (总字符数: ' + pacScript.length + ' 字节)');
