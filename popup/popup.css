@@ -1,11 +1,12 @@
 :root {
-  /* Professional Obsidian & Zinc Palette */
-  --bg-base: #111215;
-  --glass-surface: #18191e;
-  --glass-surface-hover: #202127;
-  --glass-active: #1a1f2c;
-  --glass-border: #282932;
-  --glass-border-hover: #3a3b47;
+  /* Minimal Obsidian & Zinc Palette (Unified, Frameless Architecture) */
+  --bg-base: #121316;
+  --bg-surface: #18191e;
+  --bg-surface-hover: #202127;
+  --bg-active: #1c202a;
+  --border-subtle: #1f2026;
+  --border-control: #282932;
+  --border-control-hover: #383944;
   --border-active: #3b82f6;
   --text-primary: #f4f4f6;
   --text-secondary: #a1a1aa;
@@ -13,22 +14,22 @@
   --accent-primary: #3b82f6;
   --accent-hover: #2563eb;
   --success: #22c55e;
-  --warning: #eab308;
+  --warning: #f59e0b;
   --danger: #ef4444;
   --radius-sm: 6px;
   --radius-md: 8px;
-  --radius-lg: 12px;
   --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, Menlo, Monaco, Consolas, monospace;
 }
 
 @media (prefers-color-scheme: light) {
   :root {
     --bg-base: #f4f4f6;
-    --glass-surface: #ffffff;
-    --glass-surface-hover: #f8f8fa;
-    --glass-active: #eff6ff;
-    --glass-border: #e4e4e7;
-    --glass-border-hover: #d4d4d8;
+    --bg-surface: #ffffff;
+    --bg-surface-hover: #f0f0f3;
+    --bg-active: #e8effe;
+    --border-subtle: #e4e4e7;
+    --border-control: #d4d4d8;
+    --border-control-hover: #a1a1aa;
     --border-active: #3b82f6;
     --text-primary: #18181b;
     --text-secondary: #52525b;
@@ -45,7 +46,7 @@
 }
 
 body {
-  width: 380px;
+  width: 360px;
   background-color: var(--bg-base);
   color: var(--text-primary);
   overflow-x: hidden;
@@ -54,28 +55,19 @@ body {
 }
 
 .popup-container {
-  padding: 12px 14px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
   width: 100%;
   box-sizing: border-box;
 }
 
-/* Glass Surfaces */
-.liquid-glass {
-  background: var(--glass-surface);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-md);
-  transition: all 0.15s ease;
-}
-
-/* Header */
+/* ================= 1. Header (Frameless) ================= */
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 10px;
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .brand {
@@ -85,8 +77,8 @@ body {
 }
 
 .brand-logo {
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   border-radius: var(--radius-sm);
 }
 
@@ -131,7 +123,7 @@ body {
 
 .icon-btn {
   background: transparent;
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--border-control);
   color: var(--text-secondary);
   width: 26px;
   height: 26px;
@@ -145,16 +137,19 @@ body {
 
 .icon-btn:hover {
   color: var(--text-primary);
-  border-color: var(--glass-border-hover);
-  background: var(--glass-surface-hover);
+  border-color: var(--border-control-hover);
+  background: var(--bg-surface);
 }
 
-/* Global Segmented Modes Switcher */
+/* ================= 2. Core Mode Segmented Switcher ================= */
 .segmented-modes {
   display: flex;
+  margin: 10px 14px 6px;
   padding: 3px;
   gap: 3px;
-  background: #141518;
+  background: #18191e;
+  border-radius: var(--radius-md);
+  border: 1px solid #23242b;
 }
 
 .mode-btn {
@@ -162,11 +157,11 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  padding: 6px 8px;
+  gap: 4px;
+  padding: 6px 4px;
   background: transparent;
-  border: 1px solid transparent;
-  border-radius: var(--radius-sm);
+  border: none;
+  border-radius: 6px;
   color: var(--text-secondary);
   font-size: 12px;
   font-weight: 500;
@@ -180,18 +175,18 @@ body {
 
 .mode-btn:hover {
   color: var(--text-primary);
-  background: var(--glass-surface);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .mode-btn.active {
   background: #2563eb;
   color: #ffffff;
-  border-color: #3b82f6;
+  font-weight: 600;
 }
 
-/* Network & IP Bar */
+/* ================= 3. Network & IP Bar (Integrated Inline) ================= */
 .network-bar {
-  padding: 5px 10px;
+  padding: 4px 14px 8px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -216,7 +211,7 @@ body {
 
 .network-ip {
   font-weight: 600;
-  color: var(--text-primary);
+  color: #d4d4d8;
   font-family: var(--font-mono);
 }
 
@@ -265,11 +260,13 @@ body {
   100% { transform: rotate(360deg); }
 }
 
-/* Nodes Section */
+/* ================= 4. Nodes Section (Unified List) ================= */
 .nodes-section {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
+  padding: 10px 14px 6px;
+  border-top: 1px solid var(--border-subtle);
 }
 
 .nodes-header {
@@ -288,7 +285,7 @@ body {
 .section-title {
   font-size: 11px;
   font-weight: 600;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -297,9 +294,9 @@ body {
   font-size: 10px;
   padding: 1px 5px;
   border-radius: 4px;
-  background: #202126;
-  border: 1px solid var(--glass-border);
+  background: #1c1d22;
   color: var(--text-muted);
+  font-family: var(--font-mono);
   font-weight: 600;
 }
 
@@ -313,8 +310,8 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: var(--glass-surface);
-  border: 1px solid var(--glass-border);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-control);
   border-radius: var(--radius-sm);
   color: var(--text-secondary);
   padding: 3px 7px;
@@ -326,8 +323,8 @@ body {
 
 .action-chip-btn:hover {
   color: var(--text-primary);
-  border-color: var(--glass-border-hover);
-  background: var(--glass-surface-hover);
+  border-color: var(--border-control-hover);
+  background: var(--bg-surface-hover);
 }
 
 .action-chip-btn.active {
@@ -345,8 +342,8 @@ body {
 
 .search-input {
   width: 100%;
-  background: #141518;
-  border: 1px solid var(--glass-border);
+  background: #18191e;
+  border: 1px solid var(--border-control);
   border-radius: var(--radius-sm);
   color: var(--text-primary);
   padding: 5px 24px 5px 8px;
@@ -369,10 +366,10 @@ body {
   cursor: pointer;
 }
 
-/* Filter Pills Bar */
+/* Category Filter Pills (Minimal Text Pills) */
 .filter-pills-bar {
   display: flex;
-  gap: 4px;
+  gap: 3px;
   overflow-x: auto;
   padding-bottom: 2px;
 }
@@ -382,7 +379,7 @@ body {
 }
 
 .filter-pills-bar::-webkit-scrollbar-thumb {
-  background: var(--glass-border);
+  background: var(--border-control);
   border-radius: 2px;
 }
 
@@ -391,12 +388,12 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: var(--glass-surface);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-sm);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 5px;
   padding: 2px 7px;
-  font-size: 10.5px;
-  color: var(--text-secondary);
+  font-size: 11px;
+  color: var(--text-muted);
   cursor: pointer;
   transition: all 0.15s ease;
   white-space: nowrap;
@@ -408,23 +405,22 @@ body {
 
 .filter-pill:hover {
   color: var(--text-primary);
-  border-color: var(--glass-border-hover);
-  background: var(--glass-surface-hover);
+  background: var(--bg-surface);
 }
 
 .filter-pill.active {
-  background: #20222a;
-  border-color: #3b82f6;
+  background: #1c202a;
+  border-color: #2b3345;
   color: #60a5fa;
   font-weight: 600;
 }
 
-/* Node List */
+/* Node List (Frameless Items) */
 .node-list {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  max-height: 205px;
+  gap: 2px;
+  max-height: 215px;
   overflow-y: auto;
   padding-right: 2px;
 }
@@ -434,7 +430,7 @@ body {
 }
 
 .node-list::-webkit-scrollbar-thumb {
-  background: var(--glass-border);
+  background: var(--border-control);
   border-radius: 3px;
 }
 
@@ -443,25 +439,24 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 6px 10px;
-  background: var(--glass-surface);
-  border: 1px solid var(--glass-border);
+  padding: 6px 8px;
+  background: transparent;
+  border: 1px solid transparent;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: border-color 0.15s ease, background 0.15s ease;
+  transition: all 0.12s ease;
   width: 100%;
   box-sizing: border-box;
 }
 
 .node-item:hover {
-  background: var(--glass-surface-hover);
-  border-color: var(--glass-border-hover);
+  background: var(--bg-surface);
+  border-color: #23242b;
 }
 
 .node-item.active {
-  background: #191c24;
-  border-color: var(--border-active);
-  box-shadow: 0 0 0 1px var(--border-active);
+  background: var(--bg-active);
+  border-color: #2c3850;
 }
 
 .node-left {
@@ -509,8 +504,8 @@ body {
 }
 
 .node-name {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 12.5px;
+  font-weight: 500;
   color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
@@ -541,9 +536,8 @@ body {
   font-family: var(--font-mono);
   padding: 1px 5px;
   border-radius: 3px;
-  background: #222329;
-  border: 1px solid var(--glass-border);
-  color: #d4d4d8;
+  background: #1f2026;
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.3px;
 }
@@ -551,11 +545,10 @@ body {
 .node-group-badge {
   font-size: 9.5px;
   font-weight: 500;
-  padding: 0 5px;
+  padding: 1px 5px;
   border-radius: 3px;
-  background: #1c1f28;
+  background: #1a202c;
   color: #93c5fd;
-  border: 1px solid #2a3142;
   max-width: 90px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -584,21 +577,18 @@ body {
   display: flex;
 }
 
-/* ===== 不可直接代理节点 (VMess/VLESS/Trojan/SS/SSR 等) ===== */
+/* ===== 不可直接代理节点 ===== */
 .node-item.unusable {
-  opacity: 0.65;
-  border-style: dashed;
-  border-color: #3d2828;
+  opacity: 0.55;
 }
 
 .node-item.unusable:hover {
-  opacity: 0.9;
-  border-color: var(--danger);
+  opacity: 0.85;
+  background: #1c1818;
 }
 
 .node-item.unusable .node-proto-tag {
   background: #261919;
-  border-color: #3d2323;
   color: #fca5a5;
 }
 
@@ -624,9 +614,11 @@ body {
   font-size: 11.5px;
 }
 
-/* Quick Rule Box */
+/* ================= 5. Quick Add Rule Box (Integrated Dock) ================= */
 .quick-rule-box {
-  padding: 8px 10px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--border-subtle);
+  background: #141518;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -676,9 +668,9 @@ body {
 .select-input {
   flex: 1;
   min-width: 0;
-  background: #141518;
+  background: #18191e;
   color: var(--text-primary);
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--border-control);
   border-radius: var(--radius-sm);
   padding: 5px 8px;
   font-size: 11.5px;
@@ -700,7 +692,7 @@ body {
   font-size: 11.5px;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: all 0.15s ease;
   white-space: nowrap;
   box-sizing: border-box;
 }
@@ -710,13 +702,14 @@ body {
   border-color: #2563eb;
 }
 
-/* Footer */
+/* ================= 6. Footer (Minimal) ================= */
 .footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
   font-size: 11px;
-  padding: 0 2px;
+  padding: 6px 14px 10px;
+  background: #141518;
 }
 
 .footer-tip {
@@ -730,13 +723,15 @@ body {
 }
 
 .footer-link {
-  color: var(--accent-primary);
+  color: var(--text-muted);
   text-decoration: none;
   font-weight: 500;
+  transition: color 0.15s ease;
 }
 
 .footer-link:hover {
-  text-decoration: underline;
+  color: var(--accent-primary);
+  text-decoration: none;
 }
 
 .hidden {
