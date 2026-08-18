@@ -5,6 +5,7 @@
 
 import { extractDomainInfo, fetchCurrentIpInfo, measureLatency, isProfileDirectlyUsable, getProtocolDisplay } from '../lib/utils.js';
 import { loadConfig, saveConfig } from '../lib/storage.js';
+import { applyTheme } from '../lib/theme.js';
 
 let currentConfig = null;
 let currentTabDomain = '';
@@ -21,6 +22,12 @@ const SVG_ICONS = {
   server: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg>`,
   link: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>`,
   check: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`
+};
+
+const THEME_ICONS = {
+  auto: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"></path></svg>`,
+  light: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`,
+  dark: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`
 };
 
 /**
@@ -41,6 +48,7 @@ const currentIpValue = document.getElementById('currentIpValue');
 const latencyValue = document.getElementById('latencyValue');
 const locationText = document.getElementById('locationText');
 const btnRefreshStatus = document.getElementById('btnRefreshStatus');
+const btnToggleTheme = document.getElementById('btnToggleTheme');
 const btnOpenOptions = document.getElementById('btnOpenOptions');
 const linkDashboard = document.getElementById('linkDashboard');
 const toastMessage = document.getElementById('toastMessage');
@@ -66,6 +74,21 @@ const quickRuleTargetSelect = document.getElementById('quickRuleTargetSelect');
 const btnQuickAddRule = document.getElementById('btnQuickAddRule');
 
 /**
+ * 更新主题 UI 与图标
+ */
+function updateThemeUI(theme = 'auto') {
+  applyTheme(theme);
+  if (btnToggleTheme) {
+    const iconHtml = THEME_ICONS[theme] || THEME_ICONS.auto;
+    btnToggleTheme.innerHTML = iconHtml;
+    const titleText = theme === 'auto'
+      ? '当前：跟随系统 (点击切换浅色)'
+      : (theme === 'light' ? '当前：浅色明亮 (点击切换深色)' : '当前：深色暗黑 (点击切换跟随系统)');
+    btnToggleTheme.title = titleText;
+  }
+}
+
+/**
  * 显示浮动 Toast
  */
 function showToast(text, isSuccess = false) {
@@ -81,8 +104,9 @@ function showToast(text, isSuccess = false) {
  * 初始化 Popup
  */
 async function initPopup() {
-  // 1. 优先直接从 Storage 读取配置完成即时首次渲染，避免等待后台消息
+  // 1. 优先直接从 Storage 读取配置完成即时首次渲染
   currentConfig = await loadConfig();
+  updateThemeUI(currentConfig.general?.theme || 'auto');
   renderTopSegmentedModes();
   renderFilterPills();
   renderNodeList();
@@ -93,6 +117,7 @@ async function initPopup() {
     chrome.runtime.sendMessage({ action: 'GET_CONFIG' }, (response) => {
       if (response && response.config) {
         currentConfig = response.config;
+        updateThemeUI(currentConfig.general?.theme || 'auto');
         renderTopSegmentedModes();
         renderFilterPills();
         renderNodeList();
@@ -596,6 +621,31 @@ function setupEvents() {
   btnSelectFastest.addEventListener('click', handleSelectFastest);
   btnQuickAddRule.addEventListener('click', handleQuickAddRule);
   btnRefreshStatus.addEventListener('click', refreshNetworkStatus);
+  if (btnToggleTheme) {
+    btnToggleTheme.addEventListener('click', async () => {
+      const currentTheme = currentConfig?.general?.theme || 'auto';
+      let nextTheme = 'light';
+      let msg = '已切换为浅色明亮主题';
+      if (currentTheme === 'auto') {
+        nextTheme = 'light';
+        msg = '已切换为浅色明亮主题';
+      } else if (currentTheme === 'light') {
+        nextTheme = 'dark';
+        msg = '已切换为深色暗黑主题';
+      } else {
+        nextTheme = 'auto';
+        msg = '已切换为跟随系统主题';
+      }
+
+      currentConfig.general = {
+        ...(currentConfig.general || {}),
+        theme: nextTheme
+      };
+      updateThemeUI(nextTheme);
+      await saveConfig(currentConfig);
+      showToast(msg, true);
+    });
+  }
   btnOpenOptions.addEventListener('click', openOptionsPage);
   linkDashboard.addEventListener('click', openOptionsPage);
 

@@ -3,6 +3,7 @@
  */
 
 import { loadConfig, saveConfig, DEFAULT_SETTINGS, generateId } from '../lib/storage.js';
+import { applyTheme } from '../lib/theme.js';
 import {
   simulateRuleMatch,
   measureLatency,
@@ -69,6 +70,7 @@ const selectDefaultFallbackProfile = document.getElementById('selectDefaultFallb
 const bypassListTextarea = document.getElementById('bypassListTextarea');
 const pacUrlInput = document.getElementById('pacUrlInput');
 const pacScriptTextarea = document.getElementById('pacScriptTextarea');
+const selectThemeMode = document.getElementById('selectThemeMode');
 const chkShowBadge = document.getElementById('chkShowBadge');
 const chkAutoCheckIp = document.getElementById('chkAutoCheckIp');
 const toastContainer = document.getElementById('toastContainer');
@@ -834,6 +836,11 @@ function renderPacSettings() {
  */
 function renderGeneralSettings() {
   if (!appConfig) return;
+  const currentTheme = appConfig.general?.theme || 'auto';
+  if (selectThemeMode) {
+    selectThemeMode.value = currentTheme;
+  }
+  applyTheme(currentTheme);
   if (chkShowBadge) chkShowBadge.checked = appConfig.general?.showBadge !== false;
   if (chkAutoCheckIp) chkAutoCheckIp.checked = appConfig.general?.autoCheckIp !== false;
 }
@@ -1531,14 +1538,25 @@ function setupEventListeners() {
     });
   }
 
+  // 偏好与主题设置
+  if (selectThemeMode) {
+    selectThemeMode.addEventListener('change', () => {
+      const selectedTheme = selectThemeMode.value;
+      applyTheme(selectedTheme);
+    });
+  }
+
   // 保存 General
   if (btnSaveGeneral) {
     btnSaveGeneral.addEventListener('click', () => {
+      const chosenTheme = selectThemeMode ? selectThemeMode.value : (appConfig.general?.theme || 'auto');
       appConfig.general = {
         ...appConfig.general,
+        theme: chosenTheme,
         showBadge: chkShowBadge.checked,
         autoCheckIp: chkAutoCheckIp.checked
       };
+      applyTheme(chosenTheme);
       syncAndSaveConfig('偏好设置已保存');
     });
   }
