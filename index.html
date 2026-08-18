@@ -7,7 +7,7 @@
   <meta name="description" content="MEI Proxy 是一款轻量易用的浏览器代理管理与智能分流扩展，支持 HTTP、HTTPS、SOCKS5 代理与 PAC 规则分流，配置保存在本地，支持 Chrome、Edge、Firefox 等浏览器。">
   <meta name="keywords" content="MEI Proxy, Proxy Manager, Chrome 代理扩展, Firefox 代理扩展, PAC 脚本, 分流规则, 浏览器代理">
   <link rel="icon" type="image/png" href="icons/icon48.png">
-  <link rel="stylesheet" href="assets/landing.css?v=1.0.3">
+  <link rel="stylesheet" href="assets/landing.css?v=1.1.1">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -19,20 +19,28 @@
     <div class="container nav-wrapper">
       <a href="#" class="brand">
         <img src="icons/icon48.png" alt="MEI Proxy" class="brand-icon">
-        <span class="brand-name">MEI Proxy</span>
-        <span class="brand-badge">v1.1.0</span>
+        <div class="brand-text">
+          <span class="brand-name">MEI Proxy</span>
+          <span class="brand-badge">v1.1.0</span>
+        </div>
       </a>
 
-      <ul class="nav-links">
-        <li><a href="#features">功能列表</a></li>
-        <li><a href="#download">下载扩展</a></li>
-        <li><a href="#guide">安装与使用教程</a></li>
-      </ul>
+      <nav class="nav-center">
+        <ul class="nav-links">
+          <li><a href="#features" class="nav-link">功能特性</a></li>
+          <li><a href="#download" class="nav-link">版本下载</a></li>
+          <li><a href="#guide" class="nav-link">安装教程</a></li>
+        </ul>
+      </nav>
 
       <div class="nav-actions">
-        <a href="#download" class="btn btn-primary" id="btnNavDownload">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-          下载扩展
+        <a href="https://github.com/meishengdashuaige/MEI-Proxy" target="_blank" rel="noreferrer" class="btn-github" title="查看 GitHub 仓库">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          <span>GitHub</span>
+        </a>
+        <a href="#download" class="btn-nav-download" id="btnNavDownload">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          <span>立即下载</span>
         </a>
       </div>
     </div>
